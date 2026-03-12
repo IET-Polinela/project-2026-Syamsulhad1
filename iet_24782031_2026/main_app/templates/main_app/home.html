@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" Home="width=device-width, initial-scale=1.0"/>
+  <title>SmartReport — About</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #000000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAVBAR */
+    nav {
+      background: #ffffff;
+      border-bottom: 1px solid #cccccc;
+      padding: 0 40px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
+    .logo span { color: #87ceeb; }
+    nav ul { list-style: none; display: flex; gap: 28px; }
+    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: #87ceeb; }
+
+    /* MAIN */
+    main { max-width: 800px; margin: 80px auto; padding: 0 40px; text-align: center; flex: 1; }
+
+    .badge {
+      display: inline-block;
+      background: rgba(135,206,235,0.2);
+      border: 1px solid #87ceeb;
+      border-left: 3px solid #87ceeb;
+      color: #87ceeb;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 2px;
+      margin-bottom: 28px;
+    }
+
+    h1 { font-size: 2.6rem; font-weight: 700; color: #000000; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px; }
+    h1 span { color: #87ceeb; }
+
+    .lead { font-size: 0.97rem; line-height: 1.8; color: #333333; max-width: 540px; margin-bottom: 32px; }
+
+    .btn {
+      display: inline-block;
+      background: #87ceeb;
+      color: #ffffff;
+      padding: 11px 26px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-decoration: none;
+      margin-right: 10px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #00bfff; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #cccccc;
+      color: #000000;
+    }
+    .btn-ghost:hover { border-color: #87ceeb; color: #87ceeb; background: transparent; }
+
+    /* STATS */
+    .stats {
+      display: flex;
+      margin-top: 52px;
+      border: 1px solid #cccccc;
+      border-radius: 6px;
+      overflow: hidden;
+      max-width: 460px;
+    }
+    .stat { flex: 1; padding: 18px 22px; border-right: 1px solid #cccccc; }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 1.4rem; font-weight: 700; color: #87ceeb; }
+    .stat-label { font-size: 0.7rem; color: #333333; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid #cccccc;
+      padding: 22px 40px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: #333333;
+      margin-top: auto;
+      width: 100%;
+    }
+    footer span { color: #87ceeb; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Smart<span>Report</span></a>
+  <ul>
+    <li><a href="/" class="active">Home</a></li>
+    <li><a href="/about/">About</a></li>
+    <li><a href="/contacts/">Contacts</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="badge">Platform Smart City</div>
+  <h1>Selamat Datang di<br/><span>Kota Konoha</span></h1>
+  <p class="lead">
+    Selamat datang di sistem pelaporan masalah kota konoha. Laporkan keluhan infrastruktur, lingkungan, dan fasilitas publik langsung kepada pemerintah kota.
+  </p>
+
+</main>
+
+<footer>
+  © 2025 <span>SmartReport</span> — Sistem Pelaporan Kota konoha
+</footer>
+
+</body>
+</html>

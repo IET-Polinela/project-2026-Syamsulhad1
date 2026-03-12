@@ -1,12 +1,9 @@
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponse
-
-def welcome_view(request):
-    return HttpResponse("Selamat Datang DI Web Django Syamsul Hadi")
+from django.urls import path, include
 
 urlpatterns = [
-    # Ganti 'admin.site.safe_urls' menjadi 'admin.site.urls'
-    path('admin/', admin.site.urls), 
-    path('welcome/', welcome_view),
+    path('admin/', admin.site.urls),
+    path('', include('main_app.urls')),      # Halaman Utama
+    path('about/', include('about.urls')),   # Halaman Tentang Kota
+    path('contacts/', include('contacts.urls')), # Halaman Kontak Darurat
 ]

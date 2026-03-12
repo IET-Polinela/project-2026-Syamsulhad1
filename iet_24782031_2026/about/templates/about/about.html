@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" About="width=device-width, initial-scale=1.0"/>
+  <title>SmartReport — About</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; min-height: 100vh; display: flex; flex-direction: column; }
+
+    nav {
+      background: #ffffff;
+      border-bottom: 1px solid #cccccc;
+      padding: 0 40px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
+    .logo span { color: #87ceeb; }
+    nav ul { list-style: none; display: flex; gap: 28px; }
+    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: #87ceeb; }
+
+    main { max-width: 800px; margin: 80px auto; padding: 0 40px; flex: 1; }
+
+    .page-tag { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #87ceeb; margin-bottom: 10px; }
+
+    h1 { font-size: 2.4rem; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px; }
+
+    .lead { font-size: 0.97rem; line-height: 1.8; color: #333333; max-width: 580px; margin-bottom: 52px; }
+
+    /* DIVIDER */
+    .divider { border: none; border-top: 1px solid #cccccc; margin: 48px 0; }
+
+    /* SECTION BLOCK */
+    .section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #87ceeb; margin-bottom: 8px; }
+    h2 { font-size: 1.2rem; font-weight: 600; color: #000000; margin-bottom: 12px; }
+    p { font-size: 0.92rem; line-height: 1.8; color: #333333; margin-bottom: 12px; }
+
+    /* CARDS ROW */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid #cccccc; border-radius: 6px; overflow: hidden; margin-top: 32px; }
+    .card { background: #ffffff; padding: 24px 20px; }
+    .card-num { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #87ceeb; margin-bottom: 8px; }
+    .card-title { font-size: 0.9rem; font-weight: 600; color: #000000; margin-bottom: 6px; }
+    .card-desc { font-size: 0.82rem; line-height: 1.65; color: #333333; }
+
+    footer {
+      border-top: 1px solid #cccccc;
+      padding: 22px 40px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: #333333;
+      margin-top: 100px;
+    }
+    footer span { color: #87ceeb; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Smart<span>Report</span></a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about/" class="active">About</a></li>
+    <li><a href="/contacts/">Contacts</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-tag">Tentang Platform</div>
+  <h1>Tentang SmartReport</h1>
+  <p class="lead">
+    SmartReport adalah platform digital resmi pelaporan masalah kota yang menghubungkan warga konoha dengan pemerintah daerah secara transparan dan efisien.
+  </p>
+
+  <hr class="divider"/>
+
+  <div class="section-label">Misi Kami</div>
+  <h2>Menghadirkan Pemerintahan yang Responsif</h2>
+  <p>SmartReport lahir dari kebutuhan nyata warga kota: saluran komunikasi yang langsung dan transparan antara masyarakat dan pemerintah daerah.</p>
+  <p>Dengan teknologi digital, setiap keluhan warga tidak lagi tenggelam di birokrasi, melainkan langsung menjadi aksi nyata di lapangan.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-num">01 — Transparansi</div>
+      <div class="card-title">Terbuka & Akuntabel</div>
+      <div class="card-desc">Setiap laporan dapat dipantau secara terbuka oleh warga pelapor.</div>
+    </div>
+    <div class="card">
+      <div class="card-num">02 — Kecepatan</div>
+      <div class="card-title">Respons Cepat</div>
+      <div class="card-desc">Laporan langsung diteruskan ke dinas kota yang paling relevan.</div>
+    </div>
+    <div class="card">
+      <div class="card-num">03 — Inklusif</div>
+      <div class="card-title">Untuk Semua Warga</div>
+      <div class="card-desc">Dirancang mudah digunakan oleh seluruh lapisan masyarakat.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2025 <span>SmartReport</span> — Sistem Pelaporan Kota konoha
+</footer>
+
+</body>
+</html>

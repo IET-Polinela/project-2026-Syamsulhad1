@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartReport — Contacts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #000000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* NAVBAR */
+    nav {
+      background: #ffffff;
+      border-bottom: 1px solid #cccccc;
+      padding: 0 40px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
+    .logo span { color: #87ceeb; }
+    nav ul { list-style: none; display: flex; gap: 28px; }
+    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; transition: color 0.2s; }
+    nav ul a:hover, nav ul a.active { color: #87ceeb; }
+
+    main { max-width: 800px; margin: 80px auto; padding: 0 40px; flex: 1; }
+
+    .page-tag { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #87ceeb; margin-bottom: 10px; }
+    h1 { font-size: 2.4rem; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px; }
+    .lead { font-size: 0.97rem; line-height: 1.8; color: #333333; max-width: 540px; margin-bottom: 48px; }
+    .divider { border: none; border-top: 1px solid #cccccc; margin: 44px 0; }
+
+    /* INFO LIST */
+    .section-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #87ceeb; margin-bottom: 16px; }
+    .info-list { border: 1px solid #cccccc; border-radius: 6px; overflow: hidden; }
+    .info-row {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #cccccc;
+      gap: 16px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #333333; width: 130px; flex-shrink: 0; }
+    .info-val { font-size: 0.88rem; color: #000000; }
+
+    /* FORM */
+    h2 { font-size: 1.15rem; font-weight: 600; color: #000000; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    label { display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: #333333; margin-bottom: 7px; }
+    input, textarea, select {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      color: #000000;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input::placeholder, textarea::placeholder { color: #999999; }
+    input:focus, textarea:focus, select:focus { border-color: #87ceeb; }
+    textarea { resize: vertical; min-height: 100px; }
+    select { cursor: pointer; }
+    button {
+      background: #87ceeb;
+      color: #ffffff;
+      border: none;
+      padding: 11px 26px;
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    button:hover { background: #00bfff; }
+
+    footer {
+      border-top: 1px solid #cccccc;
+      padding: 22px 40px;
+      text-align: center;
+      font-size: 0.76rem;
+      color: #333333;
+      margin-top: 100px;
+    }
+    footer span { color: #87ceeb; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Smart<span>Report</span></a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about/">About</a></li>
+    <li><a href="/contacts/" class="active">Contacts</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-tag">Hubungi Kami</div>
+  <h1>Kontak</h1>
+  <p class="lead">
+    Punya pertanyaan atau kendala? Hubungi tim SmartReport melalui informasi di bawah ini atau kirim pesan langsung melalui formulir.
+  </p>
+
+  <div class="section-label">Informasi Kontak</div>
+  <div class="info-list">
+    <div class="info-row">
+      <div class="info-key">Telepon</div>
+      <div class="info-val">(0711) 123-4567</div>
+    </div>
+    <div class="info-row">
+      <div class="info-key">Email</div>
+      <div class="info-val">info@smartreport.konoha.go.id</div>
+    </div>
+    <div class="info-row">
+      <div class="info-key">Alamat</div>
+      <div class="info-val">Jl. Merdeka No. 1, konoha, Sumatera Selatan</div>
+    </div>
+    <div class="info-row">
+      <div class="info-key">Jam Operasional</div>
+      <div class="info-val">Senin – Jumat, 08.00 – 16.00 WIB</div>
+    </div>
+  </div>
+
+  <hr class="divider"/>
+
+  <h2>Kirim Pesan</h2>
+
+  <div class="form-row">
+    <div>
+      <label for="nama">Nama Lengkap</label>
+      <input type="text" id="nama" placeholder="Nama Anda"/>
+    </div>
+    <div>
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="email@contoh.com"/>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="topik">Topik</label>
+    <select id="topik">
+      <option value="" disabled selected>Pilih topik</option>
+      <option>Pertanyaan Umum</option>
+      <option>Kendala Teknis</option>
+      <option>Saran & Masukan</option>
+      <option>Lainnya</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="pesan">Pesan</label>
+    <textarea id="pesan" placeholder="Tuliskan pesan Anda..."></textarea>
+  </div>
+  <button onclick="kirim()">Kirim Pesan</button>
+</main>
+
+<footer>
+  © 2025 <span>SmartReport</span> — Sistem Pelaporan Kota konoha
+</footer>
+
+<script>
+  function kirim() {
+    const nama = document.getElementById('nama').value;
+    const email = document.getElementById('email').value;
+    const pesan = document.getElementById('pesan').value;
+    if (!nama || !email || !pesan) { alert('Harap isi semua kolom.'); return; }
+    alert('Pesan berhasil dikirim! Tim kami akan segera menghubungi Anda.');
+  }
+</script>
+
+</body>
+</html>
