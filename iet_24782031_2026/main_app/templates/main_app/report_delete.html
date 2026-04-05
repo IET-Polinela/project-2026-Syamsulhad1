@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Konfirmasi Hapus — SmartReport</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* CSS DASAR DARI HOME.HTML */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; display: flex; flex-direction: column; min-height: 100vh; }
+    
+    nav { background: #ffffff; border-bottom: 1px solid #cccccc; padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
+    .logo span { color: #87ceeb; }
+    nav ul { list-style: none; display: flex; gap: 28px; }
+    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; }
+
+    main { max-width: 500px; margin: 100px auto; padding: 40px; text-align: center; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 8px; flex: 1; }
+    h1 { color: #cc0000; font-size: 1.5rem; margin-bottom: 15px; }
+    p { color: #333; line-height: 1.6; margin-bottom: 25px; }
+    b { color: #000; }
+
+    .btn-group { display: flex; gap: 10px; justify-content: center; }
+    .btn { padding: 10px 25px; border-radius: 4px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; font-size: 0.88rem; }
+    .btn-danger { background: #cc0000; color: white; }
+    .btn-danger:hover { background: #a30000; }
+    .btn-secondary { background: #eeeeee; color: #333; }
+
+    footer { border-top: 1px solid #cccccc; padding: 22px 40px; text-align: center; font-size: 0.76rem; color: #333333; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="{% url 'home' %}" class="logo">Smart<span>Report</span></a>
+  <ul>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'about' %}">About</a></li>
+    <li><a href="{% url 'contacts' %}">Contacts</a></li>
+  </ul>
+</nav>
+
+<main>
+  <h1>Konfirmasi Hapus</h1>
+  <p>Apakah Anda yakin ingin menghapus laporan:<br><b>"{{ report.title }}"</b>?<br>Tindakan ini tidak dapat dibatalkan.</p>
+  
+  <form method="POST">
+    {% csrf_token %}
+    <div class="btn-group">
+      <button type="submit" class="btn btn-danger">Ya, Hapus Permanen</button>
+      <a href="{% url 'report_list' %}" class="btn btn-secondary">Batal</a>
+    </div>
+  </form>
+</main>
+
+<footer>© 2026 <span>SmartReport</span> — Sistem Pelaporan Kota Konoha</footer>
+
+</body>
+</html>

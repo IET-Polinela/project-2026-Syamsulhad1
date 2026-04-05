@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar Laporan — SmartReport</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    /* ... (Paste semua isi <style> dari home.html Anda di sini) ... */
+    /* Tambahan sedikit agar list terlihat rapi */
+    ul { list-style: none; text-align: left; margin-top: 20px; }
+    li { border: 1px solid #cccccc; padding: 15px; margin-bottom: 10px; border-radius: 4px; }
+    .btn-add { display: block; margin: 20px auto; width: fit-content; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="{% url 'home' %}" class="logo">Smart<span>Report</span></a>
+  <ul>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'about' %}">About</a></li>
+    <li><a href="{% url 'contacts' %}">Contacts</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="badge">Laporan Warga</div>
+  <h1>Daftar <span>Laporan</span></h1>
+  
+  <a href="{% url 'report_create' %}" class="btn btn-add">Tambah Laporan Baru</a>
+
+  <ul>
+    {% for report in reports %}
+      <li>
+        <strong style="color: #87ceeb;">{{ report.title }}</strong> — {{ report.location }} <br>
+        <p style="font-size: 0.9rem; color: #333; margin: 10px 0;">{{ report.description }}</p>
+        <a href="{% url 'report_update' report.pk %}" style="color: #87ceeb; text-decoration: none; font-weight: 600;">Edit</a> |
+        <a href="{% url 'report_delete' report.pk %}" style="color: #ff4d4d; text-decoration: none; font-weight: 600;">Hapus</a>
+      </li>
+    {% empty %}
+      <p class="lead">Belum ada laporan yang masuk.</p>
+    {% endfor %}
+  </ul>
+</main>
+
+<footer>
+  © 2026 <span>SmartReport</span> — Sistem Pelaporan Kota Konoha
+</footer>
+
+</body>
+</html>

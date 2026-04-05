@@ -104,20 +104,35 @@
 <body>
 
 <nav>
-  <a href="/" class="logo">Smart<span>Report</span></a>
+  <a href="{% url 'home' %}" class="logo">Smart<span>Report</span></a>
   <ul>
-    <li><a href="/" class="active">Home</a></li>
-    <li><a href="/about/">About</a></li>
-    <li><a href="/contacts/">Contacts</a></li>
+    <li><a href="{% url 'home' %}" class="active">Home</a></li>
+    <li><a href="{% url 'about' %}">About</a></li>
+    <li><a href="{% url 'contacts' %}">Contacts</a></li>
   </ul>
 </nav>
 
 <main>
   <div class="badge">Platform Smart City</div>
-  <h1>Selamat Datang di<br/><span>Kota Konoha</span></h1>
+  <h1>Walcome to<br/><span>Konoha city</span></h1>
   <p class="lead">
     Selamat datang di sistem pelaporan masalah kota konoha. Laporkan keluhan infrastruktur, lingkungan, dan fasilitas publik langsung kepada pemerintah kota.
   </p>
+  <div style="margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+    <a href="{% url 'about' %}" class="btn">Pelajari Lebih Lanjut</a>
+    <a href="{% url 'contacts' %}" class="btn btn-ghost">Hubungi Kami</a>
+    <a href="{% url 'report_list' %}" class="btn btn-ghost">Daftar Laporan</a>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">{{ total_reports }}</div>
+      <div class="stat-label">Total Laporan</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24</div>
+      <div class="stat-label">Laporan Tertangani</div>
+    </div>
+  </div>
 
 </main>
 
