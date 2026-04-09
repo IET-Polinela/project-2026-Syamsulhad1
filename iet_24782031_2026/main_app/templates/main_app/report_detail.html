@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detail Laporan — SmartReport</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brand: #0ea5e9; --brand-deep: #0284c7; --brand-pale: #e0f2fe;
+      --dark: #0c1220; --gray-50: #f8fafc; --gray-200: #e2e8f0; --gray-500: #64748b;
+    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50); color: var(--dark); margin: 0; }
+    
+    nav { background: white; border-bottom: 1px solid var(--gray-200); padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--dark); font-weight: 700; }
+    .nav-logo-box { width: 32px; height: 32px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; }
+
+    main { max-width: 800px; margin: 40px auto; padding: 0 24px; animation: fadeUp 0.6s ease; }
+    
+    .detail-card { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+    .detail-header { padding: 32px; border-bottom: 1px solid var(--gray-200); background: linear-gradient(to right, #ffffff, #f8fafc); }
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; }
+    
+    /* Status Colors */
+    .status-REPORTED { background: #e0f2fe; color: #0369a1; }
+    .status-VERIFIED { background: #fef9c3; color: #854d0e; }
+    .status-IN_PROGRESS { background: #ffedd5; color: #9a3412; }
+    .status-RESOLVED { background: #dcfce7; color: #166534; }
+
+    .detail-body { padding: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .info-group { margin-bottom: 24px; }
+    .info-label { font-size: 0.75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .info-value { font-size: 1rem; font-weight: 500; color: var(--dark); line-height: 1.6; }
+    .full-width { grid-column: span 2; }
+
+    .action-bar { background: var(--gray-50); padding: 20px 32px; display: flex; gap: 12px; border-top: 1px solid var(--gray-200); }
+    .btn { padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-outline { border: 1px solid var(--gray-200); color: var(--gray-500); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="{% url 'home' %}" class="nav-logo">
+    <div class="nav-logo-box">SR</div>
+    <span>SmartReport</span>
+  </a>
+</nav>
+
+<main>
+  <div class="detail-card">
+    <div class="detail-header">
+      <span class="status-badge status-{{ report.status }}">{{ report.get_status_display }}</span>
+      <h1 style="margin: 0; font-size: 1.8rem; font-weight: 800;">{{ report.title }}</h1>
+    </div>
+
+    <div class="detail-body">
+      <div class="info-group">
+        <div class="info-label">Kategori Laporan</div>
+        <div class="info-value">{{ report.get_category_display }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">Lokasi Kejadian</div>
+        <div class="info-value">{{ report.location }}</div>
+      </div>
+      <div class="info-group full-width">
+        <div class="info-label">Deskripsi Lengkap</div>
+        <div class="info-value">{{ report.description }}</div>
+      </div>
+      <div class="info-group">
+        <div class="info-label">Tanggal Pelaporan</div>
+        <div class="info-value">🗓 {{ report.created_at|date:"d F Y, H:i" }}</div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <a href="{% url 'report_list' %}" class="btn btn-outline">← Kembali</a>
+      <a href="{% url 'report_update' report.pk %}" class="btn btn-primary">Edit Laporan</a>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

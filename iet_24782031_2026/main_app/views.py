@@ -1,42 +1,56 @@
-from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Report
 from .forms import ReportForm
 
+# View untuk Halaman Home (Menampilkan statistik singkat)
+class HomeView(TemplateView):
+    template_name = 'main_app/home.html'
 
-def home(request):
-    # Alih-alih hanya merender halaman statis, 
-    # Anda bisa menampilkan jumlah laporan terbaru di halaman depan
-    reports_count = Report.objects.count()
-    return render(request, 'main_app/home.html', {'total_reports': reports_count})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_reports'] = Report.objects.count()
+        return context
 
-def report_list(request):
-    reports = Report.objects.all()
-    return render(request, 'main_app/report_list.html', {'reports': reports})
+# ListView: Menampilkan daftar laporan
+class ReportListView(ListView):
+    model = Report
+    template_name = 'main_app/report_list.html'
+    context_object_name = 'reports' # Agar di template tetap menggunakan variabel 'reports'
 
-def report_create(request):
-    if request.method == 'POST':
-        form = ReportForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('report_list')
-    else:
-        form = ReportForm()
-    return render(request, 'main_app/report_form.html', {'form': form})
+# DetailView: Menampilkan detail laporan (Opsional, jika dibutuhkan)
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'main_app/report_detail.html'
 
-def report_update(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if request.method == 'POST':
-        form = ReportForm(request.POST, instance=report)
-        if form.is_valid():
-            form.save()
-            return redirect('report_list')
-    else:
-        form = ReportForm(instance=report)
-    return render(request, 'main_app/report_form.html', {'form': form})
+# CreateView: Membuat laporan baru
+class ReportCreateView(CreateView):
+    model = Report
+    form_class = ReportForm
+    template_name = 'main_app/report_form.html'
+    success_url = reverse_lazy('report_list')
 
-def report_delete(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if request.method == 'POST':
-        report.delete()
+# UpdateView: Mengedit data laporan
+class ReportUpdateView(UpdateView):
+    model = Report
+    form_class = ReportForm
+    template_name = 'main_app/report_form.html'
+    success_url = reverse_lazy('report_list')
+
+# DeleteView: Menghapus laporan
+class ReportDeleteView(DeleteView):
+    model = Report
+    template_name = 'main_app/report_delete.html'
+    success_url = reverse_lazy('report_list')
+
+# Implementasi Workflow Dasar: Update Status Saja
+class ReportUpdateStatusView(View):
+    def post(self, request, pk):
+        report = get_object_or_404(Report, pk=pk)
+        new_status = request.POST.get('status')
+        if new_status:
+            report.status = new_status
+            report.save()
         return redirect('report_list')
-    return render(request, 'main_app/report_delete.html', {'report': report})

@@ -3,67 +3,84 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Form Laporan — SmartReport</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <title>Edit Laporan — SmartReport</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    /* CSS DASAR DARI HOME.HTML */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    nav { background: #ffffff; border-bottom: 1px solid #cccccc; padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
-    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
-    .logo span { color: #87ceeb; }
-    nav ul { list-style: none; display: flex; gap: 28px; }
-    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; transition: color 0.2s; }
-    nav ul a:hover { color: #87ceeb; }
-
-    main { max-width: 600px; margin: 60px auto; padding: 0 20px; flex: 1; width: 100%; }
-    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 24px; text-align: center; }
-    h1 span { color: #87ceeb; }
-
-    /* STYLING FORM */
-    form { background: #f9f9f9; padding: 30px; border-radius: 8px; border: 1px solid #eeeeee; }
-    form p { margin-bottom: 15px; }
-    form label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #333; }
-    form input, form textarea, form select { 
-      width: 100%; padding: 10px; border: 1px solid #cccccc; border-radius: 4px; font-family: inherit; font-size: 0.9rem;
+    :root {
+      --brand: #0ea5e9; --brand-deep: #0284c7; --brand-pale: #e0f2fe;
+      --dark: #0c1220; --gray-200: #e2e8f0; --gray-500: #64748b;
+      --grad-brand: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
     }
-    form input:focus { border-color: #87ceeb; outline: none; }
 
-    .btn-container { display: flex; gap: 10px; margin-top: 20px; }
-    .btn { flex: 1; padding: 12px; border-radius: 4px; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer; border: none; font-size: 0.9rem; }
-    .btn-save { background: #87ceeb; color: white; }
-    .btn-save:hover { background: #00bfff; }
-    .btn-cancel { background: transparent; border: 1px solid #cccccc; color: #666; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fcfcfd; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+    
+    nav { background: white; border-bottom: 1px solid var(--gray-200); padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--dark); font-weight: 700; }
+    .nav-logo-box { width: 32px; height: 32px; background: var(--grad-brand); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; }
 
-    footer { border-top: 1px solid #cccccc; padding: 22px 40px; text-align: center; font-size: 0.76rem; color: #333333; margin-top: auto; }
-    footer span { color: #87ceeb; }
+    main { max-width: 600px; margin: 50px auto; padding: 0 24px; flex: 1; width: 100%; animation: fadeUp 0.6s ease; }
+    h1 { text-align: center; font-weight: 800; font-size: 1.8rem; margin-bottom: 30px; }
+    h1 span { color: var(--brand); }
+
+    /* STYLING SEMUA INPUT TERMASUK DROPDOWN STATUS */
+    form { background: white; padding: 32px; border-radius: 16px; border: 1px solid var(--gray-200); box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+    
+    /* Django as_p wrapper */
+    form p { margin-bottom: 20px; }
+    form label { display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px; color: var(--dark); }
+    
+    /* Input, Textarea, dan Select (Status) */
+    form input, form textarea, form select { 
+      width: 100%; padding: 12px 16px; border: 1px solid var(--gray-200); border-radius: 10px; 
+      font-family: inherit; font-size: 0.95rem; transition: all 0.2s; background: #fff;
+    }
+    
+    form input:focus, form textarea:focus, form select:focus { 
+      border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px var(--brand-pale); 
+    }
+
+    /* Styling khusus Dropdown (Status & Category) agar tidak kaku */
+    form select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 18px;
+    }
+
+    .btn-container { display: flex; gap: 12px; margin-top: 30px; }
+    .btn { flex: 1; padding: 14px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none; }
+    .btn-save { background: var(--grad-brand); color: white; box-shadow: 0 4px 12px rgba(14,165,233,0.3); }
+    .btn-save:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn-cancel { background: #f1f5f9; color: var(--gray-500); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="{% url 'home' %}" class="logo">Smart<span>Report</span></a>
-  <ul>
-    <li><a href="{% url 'home' %}">Home</a></li>
-    <li><a href="{% url 'about' %}">About</a></li>
-    <li><a href="{% url 'contacts' %}">Contacts</a></li>
-  </ul>
+  <a href="{% url 'home' %}" class="nav-logo">
+    <div class="nav-logo-box">SR</div>
+    <span>SmartReport</span>
+  </a>
 </nav>
 
 <main>
-  <h1>Isi <span>Laporan</span></h1>
+  <h1>Ubah <span>Laporan & Status</span></h1>
+  
   <form method="POST">
     {% csrf_token %}
+    
     {{ form.as_p }}
+    
     <div class="btn-container">
-      <button type="submit" class="btn btn-save">Simpan Laporan</button>
+      <button type="submit" class="btn btn-save">Simpan Perubahan</button>
       <a href="{% url 'report_list' %}" class="btn btn-cancel">Batal</a>
     </div>
   </form>
 </main>
-
-<footer>© 2026 <span>SmartReport</span> — Sistem Pelaporan Kota Konoha</footer>
 
 </body>
 </html>

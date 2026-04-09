@@ -2,143 +2,362 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" Home="width=device-width, initial-scale=1.0"/>
-  <title>SmartReport — About</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartReport — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #ffffff;
-      color: #000000;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:        #0ea5e9;
+      --brand-deep:   #0284c7;
+      --brand-dark:   #0369a1;
+      --brand-pale:   #e0f2fe;
+      --accent:       #06b6d4;
+      --dark:         #0c1220;
+      --dark-mid:     #1e293b;
+      --white:        #ffffff;
+      --gray-50:      #f8fafc;
+      --gray-100:     #f1f5f9;
+      --gray-200:     #e2e8f0;
+      --gray-400:     #94a3b8;
+      --gray-500:     #64748b;
+      --gray-700:     #334155;
+      --grad-brand:   linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+      --grad-hero:    linear-gradient(135deg, rgba(12,18,32,0.85) 0%, rgba(2,100,149,0.6) 100%);
+      --shadow-sm:    0 1px 3px rgba(14,165,233,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md:    0 4px 16px rgba(14,165,233,0.12), 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-lg:    0 10px 40px rgba(14,165,233,0.18), 0 4px 16px rgba(0,0,0,0.1);
     }
 
-    /* NAVBAR */
-    nav {
-      background: #ffffff;
-      border-bottom: 1px solid #cccccc;
-      padding: 0 40px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo { font-weight: 700; font-size: 1.1rem; color: #000000; text-decoration: none; }
-    .logo span { color: #87ceeb; }
-    nav ul { list-style: none; display: flex; gap: 28px; }
-    nav ul a { text-decoration: none; color: #000000; font-size: 0.88rem; transition: color 0.2s; }
-    nav ul a:hover, nav ul a.active { color: #87ceeb; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--white); color: var(--dark); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
 
-    /* MAIN */
-    main { max-width: 800px; margin: 80px auto; padding: 0 40px; text-align: center; flex: 1; }
-
-    .badge {
-      display: inline-block;
-      background: rgba(135,206,235,0.2);
-      border: 1px solid #87ceeb;
-      border-left: 3px solid #87ceeb;
-      color: #87ceeb;
+    /* ─── TOPBAR ─── */
+    .topbar {
+      background: var(--dark);
+      color: var(--gray-400);
       font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 5px 12px;
-      border-radius: 2px;
-      margin-bottom: 28px;
-    }
-
-    h1 { font-size: 2.6rem; font-weight: 700; color: #000000; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px; }
-    h1 span { color: #87ceeb; }
-
-    .lead { font-size: 0.97rem; line-height: 1.8; color: #333333; max-width: 540px; margin-bottom: 32px; }
-
-    .btn {
-      display: inline-block;
-      background: #87ceeb;
-      color: #ffffff;
-      padding: 11px 26px;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 0.88rem;
-      text-decoration: none;
-      margin-right: 10px;
-      transition: background 0.2s;
-    }
-    .btn:hover { background: #00bfff; }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid #cccccc;
-      color: #000000;
-    }
-    .btn-ghost:hover { border-color: #87ceeb; color: #87ceeb; background: transparent; }
-
-    /* STATS */
-    .stats {
+      padding: 7px 48px;
       display: flex;
-      margin-top: 52px;
-      border: 1px solid #cccccc;
-      border-radius: 6px;
-      overflow: hidden;
-      max-width: 460px;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      animation: slideDown 0.5s ease both;
     }
-    .stat { flex: 1; padding: 18px 22px; border-right: 1px solid #cccccc; }
-    .stat:last-child { border-right: none; }
-    .stat-num { font-size: 1.4rem; font-weight: 700; color: #87ceeb; }
-    .stat-label { font-size: 0.7rem; color: #333333; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .topbar-left { display: flex; gap: 20px; align-items: center; }
+    .topbar-left a { color: var(--gray-400); text-decoration: none; transition: color 0.2s; }
+    .topbar-left a:hover { color: var(--brand); }
+    .topbar-dot { color: var(--dark-mid); }
 
-    /* FOOTER */
-    footer {
-      border-top: 1px solid #cccccc;
-      padding: 22px 40px;
-      text-align: center;
-      font-size: 0.76rem;
-      color: #333333;
-      margin-top: auto;
-      width: 100%;
+    /* ─── NAV (SHARED) ─── */
+    nav {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 48px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      animation: slideDown 0.5s ease 0.05s both;
+      transition: box-shadow 0.3s;
     }
-    footer span { color: #87ceeb; }
+    nav.scrolled { box-shadow: var(--shadow-md); }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .nav-logo-box {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--grad-brand);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.78rem; color: var(--white);
+      letter-spacing: -0.02em;
+      box-shadow: 0 2px 8px rgba(14,165,233,0.4);
+      flex-shrink: 0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-logo:hover .nav-logo-box { transform: scale(1.08); box-shadow: 0 4px 14px rgba(14,165,233,0.5); }
+    .nav-logo-text { font-weight: 700; font-size: 1rem; color: var(--dark); letter-spacing: -0.01em; }
+    .nav-logo-text em { font-style: normal; color: var(--brand-deep); }
+
+    nav ul { list-style: none; display: flex; gap: 4px; justify-content: center; }
+    nav ul li a {
+      text-decoration: none; color: var(--gray-700); font-size: 0.86rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      position: relative;
+    }
+    nav ul li a:hover { color: var(--brand-deep); background: var(--brand-pale); }
+    nav ul li a.active {
+      color: var(--brand-deep); font-weight: 600;
+      background: var(--brand-pale);
+    }
+
+    .nav-right { display: flex; justify-content: flex-end; }
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--grad-brand);
+      color: var(--white); text-decoration: none;
+      padding: 9px 20px; border-radius: 8px;
+      font-size: 0.84rem; font-weight: 700;
+      box-shadow: 0 2px 10px rgba(14,165,233,0.35);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      white-space: nowrap;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.45); filter: brightness(1.05); }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 500px;
+      background: var(--grad-hero),
+        url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&q=80') center/cover no-repeat;
+      display: flex; align-items: center;
+      padding: 80px 48px;
+      overflow: hidden;
+    }
+    /* animated gradient orb */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,233,0.18) 0%, transparent 70%);
+      animation: pulse 6s ease-in-out infinite;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: 10%;
+      width: 350px; height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
+      animation: pulse 8s ease-in-out 1s infinite;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 560px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(14,165,233,0.15);
+      border: 1px solid rgba(14,165,233,0.4);
+      color: #7dd3fc;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 20px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s ease 0.2s both;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); animation: ping 2s ease infinite; }
+    .hero h1 {
+      font-size: 2.8rem; font-weight: 800; color: var(--white);
+      line-height: 1.15; letter-spacing: -0.03em;
+      margin-bottom: 18px;
+      animation: fadeUp 0.7s ease 0.3s both;
+    }
+    .hero h1 span { color: #7dd3fc; }
+    .hero p {
+      font-size: 0.95rem; color: rgba(255,255,255,0.75); line-height: 1.8;
+      margin-bottom: 32px;
+      animation: fadeUp 0.7s ease 0.4s both;
+    }
+    .hero-btns {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      animation: fadeUp 0.7s ease 0.5s both;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--grad-brand); color: var(--white);
+      padding: 12px 26px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 700; text-decoration: none;
+      box-shadow: 0 4px 16px rgba(14,165,233,0.4);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.5); filter: brightness(1.05); }
+    .btn-ghost {
+      background: transparent; border: 1.5px solid rgba(255,255,255,0.4); color: var(--white);
+      box-shadow: none;
+    }
+    .btn-ghost:hover { border-color: var(--brand); color: #7dd3fc; background: rgba(14,165,233,0.1); box-shadow: none; filter: none; }
+
+    /* ─── SERVICE CARDS ─── */
+    .services {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--gray-200);
+      animation: fadeUp 0.8s ease 0.1s both;
+    }
+    .service-card {
+      background: var(--white); padding: 32px 28px;
+      border-right: 1px solid var(--gray-200);
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+      cursor: default;
+    }
+    .service-card:last-child { border-right: none; }
+    .service-card:hover { background: var(--gray-50); transform: translateY(-3px); box-shadow: var(--shadow-md); z-index: 1; }
+    .service-icon {
+      width: 48px; height: 48px;
+      background: var(--brand-pale);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .service-card:hover .service-icon { background: var(--grad-brand); transform: scale(1.1); }
+    .service-icon svg { width: 22px; height: 22px; stroke: var(--brand-deep); fill: none; stroke-width: 1.8; transition: stroke 0.25s; }
+    .service-card:hover .service-icon svg { stroke: var(--white); }
+    .service-card h3 { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .service-card p { font-size: 0.82rem; color: var(--gray-500); line-height: 1.75; }
+
+    /* ─── STATS ─── */
+    .stats {
+      background: var(--dark);
+      padding: 28px 48px; display: flex;
+      animation: fadeUp 0.8s ease 0.2s both;
+    }
+    .stat { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.08); padding: 8px 0; }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-size: 1.9rem; font-weight: 800;
+      background: var(--grad-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { font-size: 0.68rem; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--gray-200);
+      padding: 20px 48px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.75rem; color: var(--gray-500); margin-top: auto;
+    }
+    footer .foot-brand { color: var(--brand-deep); font-weight: 700; }
+
+    /* ─── KEYFRAMES ─── */
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity:1; } 50% { transform: scale(1.12); opacity:0.7; } }
+    @keyframes ping { 0%,100% { transform: scale(1); opacity:1; } 50% { transform: scale(1.5); opacity:0.4; } }
+
+    /* ─── SCROLL-REVEAL ─── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      .topbar { padding: 6px 20px; font-size: 0.68rem; }
+      nav { padding: 0 20px; }
+      nav ul { gap: 2px; }
+      nav ul li a { padding: 5px 8px; font-size: 0.78rem; }
+      .hero { padding: 60px 20px; min-height: 400px; }
+      .hero h1 { font-size: 2rem; }
+      .services { grid-template-columns: 1fr; }
+      .service-card { border-right: none; border-bottom: 1px solid var(--gray-200); }
+      .stats { padding: 20px; flex-wrap: wrap; }
+      .stat { min-width: 50%; border-right: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      footer { flex-direction: column; gap: 6px; padding: 16px 20px; text-align: center; }
+    }
   </style>
 </head>
 <body>
 
-<nav>
-  <a href="{% url 'home' %}" class="logo">Smart<span>Report</span></a>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="tel:+628210000000">📞 +62 821 0000 0000</a>
+    <span class="topbar-dot">·</span>
+    <a href="mailto:smartreport@konoha.go.id">✉ smartreport@konoha.go.id</a>
+  </div>
+  <div>Bahasa: Indonesia ▾</div>
+</div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <div class="nav-logo-box">SR</div>
+    <span class="nav-logo-text">Smart <em>Report</em></span>
+  </a>
   <ul>
     <li><a href="{% url 'home' %}" class="active">Home</a></li>
     <li><a href="{% url 'about' %}">About</a></li>
     <li><a href="{% url 'contacts' %}">Contacts</a></li>
+    <li><a href="{% url 'report_list' %}">Daftar Laporan</a></li>
   </ul>
+  <div class="nav-right">
+    <a href="{% url 'report_list' %}" class="nav-cta">Buat Laporan →</a>
+  </div>
 </nav>
 
-<main>
-  <div class="badge">Platform Smart City</div>
-  <h1>Walcome to<br/><span>Konoha city</span></h1>
-  <p class="lead">
-    Selamat datang di sistem pelaporan masalah kota konoha. Laporkan keluhan infrastruktur, lingkungan, dan fasilitas publik langsung kepada pemerintah kota.
-  </p>
-  <div style="margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-    <a href="{% url 'about' %}" class="btn">Pelajari Lebih Lanjut</a>
-    <a href="{% url 'contacts' %}" class="btn btn-ghost">Hubungi Kami</a>
-    <a href="{% url 'report_list' %}" class="btn btn-ghost">Daftar Laporan</a>
-  </div>
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-num">{{ total_reports }}</div>
-      <div class="stat-label">Total Laporan</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">24</div>
-      <div class="stat-label">Laporan Tertangani</div>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="badge"><span class="badge-dot"></span> Platform Konoha Smart City</div>
+    <h1><span>Layanan Cepat, Transparan, dan Terpercaya untuk Warga kota</span></h1>
+    <p>Selamat datang di sistem pelaporan masalah kota Konoha. Laporkan keluhan infrastruktur, lingkungan, dan fasilitas publik langsung kepada pemerintah kota.</p>
+    <div class="hero-btns">
+      <a href="{% url 'about' %}" class="btn">Pelajari Lebih Lanjut →</a>
+      <a href="{% url 'contacts' %}" class="btn btn-ghost">Hubungi Kami →</a>
     </div>
   </div>
+</div>
 
-</main>
+<!-- SERVICES -->
+<div class="services">
+  <div class="service-card reveal">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <h3>Infrastruktur & Jalan</h3>
+    <p>Laporkan kerusakan jalan, jembatan, atau fasilitas infrastruktur kota yang perlu perbaikan segera.</p>
+  </div>
+  <div class="service-card reveal" style="transition-delay:0.1s">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+    </div>
+    <h3>Lingkungan & Kebersihan</h3>
+    <p>Adukan masalah sampah, polusi, atau kondisi lingkungan yang mengganggu kenyamanan warga kota.</p>
+  </div>
+  <div class="service-card reveal" style="transition-delay:0.2s">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </div>
+    <h3>Fasilitas Publik</h3>
+    <p>Laporkan kondisi taman, lampu jalan, halte, dan fasilitas umum yang membutuhkan perhatian.</p>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat reveal">
+    <div class="stat-num">{{ total_reports }}</div>
+    <div class="stat-label">Total Laporan</div>
+  </div>
+  <div class="stat reveal" style="transition-delay:0.1s">
+    <div class="stat-num">24</div>
+    <div class="stat-label">Laporan Tertangani</div>
+  </div>
+  <div class="stat reveal" style="transition-delay:0.2s">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Kategori Layanan</div>
+  </div>
+</div>
 
 <footer>
-  © 2025 <span>SmartReport</span> — Sistem Pelaporan Kota konoha
+  <span>© 2025 <span class="foot-brand">SmartReport</span> — Sistem Pelaporan Kota Konoha</span>
+  <span>Dibuat untuk warga Konoha</span>
 </footer>
 
+<script>
+  // Sticky nav shadow
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
