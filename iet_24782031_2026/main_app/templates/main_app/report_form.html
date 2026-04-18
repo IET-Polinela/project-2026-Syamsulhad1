@@ -1,86 +1,125 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Edit Laporan — SmartReport</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --brand: #0ea5e9; --brand-deep: #0284c7; --brand-pale: #e0f2fe;
-      --dark: #0c1220; --gray-200: #e2e8f0; --gray-500: #64748b;
-      --grad-brand: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-    }
+{% extends 'base.html' %}
 
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fcfcfd; display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
-    
-    nav { background: white; border-bottom: 1px solid var(--gray-200); padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--dark); font-weight: 700; }
-    .nav-logo-box { width: 32px; height: 32px; background: var(--grad-brand); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; }
+{% block title %}
+    {% if form.instance.pk %}Edit Laporan{% else %}Buat Laporan Baru{% endif %} — SmartReport
+{% endblock %}
 
-    main { max-width: 600px; margin: 50px auto; padding: 0 24px; flex: 1; width: 100%; animation: fadeUp 0.6s ease; }
-    h1 { text-align: center; font-weight: 800; font-size: 1.8rem; margin-bottom: 30px; }
-    h1 span { color: var(--brand); }
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'report_list' %}" class="text-decoration-none">Daftar Laporan</a></li>
+<li class="breadcrumb-item active" aria-current="page">
+    {% if form.instance.pk %}Edit Laporan{% else %}Tambah Laporan{% endif %}
+</li>
+{% endblock %}
 
-    /* STYLING SEMUA INPUT TERMASUK DROPDOWN STATUS */
-    form { background: white; padding: 32px; border-radius: 16px; border: 1px solid var(--gray-200); box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
-    
-    /* Django as_p wrapper */
-    form p { margin-bottom: 20px; }
-    form label { display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 8px; color: var(--dark); }
-    
-    /* Input, Textarea, dan Select (Status) */
-    form input, form textarea, form select { 
-      width: 100%; padding: 12px 16px; border: 1px solid var(--gray-200); border-radius: 10px; 
-      font-family: inherit; font-size: 0.95rem; transition: all 0.2s; background: #fff;
-    }
-    
-    form input:focus, form textarea:focus, form select:focus { 
-      border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px var(--brand-pale); 
-    }
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="mb-4">
+            <h2 class="fw-800 mb-1">
+                {% if form.instance.pk %}Perbarui <span class="text-primary">Laporan</span>{% else %}Buat <span class="text-primary">Laporan</span>{% endif %}
+            </h2>
+            <p class="text-muted">Lengkapi detail informasi di bawah ini dengan akurat.</p>
+        </div>
 
-    /* Styling khusus Dropdown (Status & Category) agar tidak kaku */
-    form select {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
-      background-size: 18px;
-    }
+        <div class="card border rounded-4 shadow-lg" style="border-color: #d4d4d4;">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
 
-    .btn-container { display: flex; gap: 12px; margin-top: 30px; }
-    .btn { flex: 1; padding: 14px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none; }
-    .btn-save { background: var(--grad-brand); color: white; box-shadow: 0 4px 12px rgba(14,165,233,0.3); }
-    .btn-save:hover { transform: translateY(-2px); filter: brightness(1.1); }
-    .btn-cancel { background: #f1f5f9; color: var(--gray-500); }
+                    <div class="mb-4">
+                        <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Judul Laporan</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">Contoh: Jalan berlubang di depan pasar.</div>
+                    </div>
 
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
-</head>
-<body>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.location.id_for_label }}" class="form-label fw-bold">Lokasi Kejadian</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt"></i></span>
+                                {{ form.location }}
+                            </div>
+                            {% if form.location.errors %}
+                                <div class="text-danger small mt-1">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
 
-<nav>
-  <a href="{% url 'home' %}" class="nav-logo">
-    <div class="nav-logo-box">SR</div>
-    <span>SmartReport</span>
-  </a>
-</nav>
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.category.id_for_label }}" class="form-label fw-bold">Kategori</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
 
-<main>
-  <h1>Ubah <span>Laporan & Status</span></h1>
-  
-  <form method="POST">
-    {% csrf_token %}
-    
-    {{ form.as_p }}
-    
-    <div class="btn-container">
-      <button type="submit" class="btn btn-save">Simpan Perubahan</button>
-      <a href="{% url 'report_list' %}" class="btn btn-cancel">Batal</a>
+                    <div class="mb-4">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Deskripsi Lengkap</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <hr class="my-4 text-muted opacity-25">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'report_list' %}" class="btn btn-light border px-4 py-2 rounded-3 fw-bold">
+                            <i class="bi bi-arrow-left me-2"></i>Kembali
+                        </a>
+                        <button type="submit" id="submitBtn" class="btn btn-primary px-5 py-2 rounded-3 shadow-sm" style="background: var(--grad-brand); border: none;">
+                            <span class="btn-text">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>
+                                {% if form.instance.pk %}Update Laporan{% else %}Kirim Laporan{% endif %}
+                            </span>
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            <span class="loading-text d-none ms-2">Mengirim...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </form>
-</main>
+</div>
 
-</body>
-</html>
+<script>
+    // Memastikan class Bootstrap masuk ke widget Django saat halaman dimuat
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.type !== 'hidden') {
+                el.classList.add('form-control');
+                if (el.tagName === 'SELECT') el.classList.add('form-select');
+                el.classList.add('rounded-3');
+            }
+        });
+    });
+</script>
+
+<script>
+    const form = document.querySelector('form');
+    const btn = document.querySelector('#submitBtn');
+    const btnText = btn.querySelector('.btn-text');
+    const spinner = btn.querySelector('.spinner-border');
+    const loadingText = btn.querySelector('.loading-text');
+
+    form.addEventListener('submit', function() {
+        // Cek apakah form valid secara HTML5 (karena novalidate dihapus)
+        if (form.checkValidity()) {
+            // Disable tombol agar tidak bisa diklik dua kali
+            btn.disabled = true;
+            
+            // Tukar tampilan teks dengan spinner
+            btnText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            loadingText.classList.remove('d-none');
+        }
+    });
+</script>
+{% endblock %}

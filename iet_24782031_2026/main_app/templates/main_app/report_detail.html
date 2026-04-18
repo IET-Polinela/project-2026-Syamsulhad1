@@ -1,88 +1,68 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detail Laporan — SmartReport</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --brand: #0ea5e9; --brand-deep: #0284c7; --brand-pale: #e0f2fe;
-      --dark: #0c1220; --gray-50: #f8fafc; --gray-200: #e2e8f0; --gray-500: #64748b;
-    }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50); color: var(--dark); margin: 0; }
+{% extends 'base.html' %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'report_list' %}" class="text-decoration-none">Daftar Laporan</a></li>
+<li class="breadcrumb-item active" aria-current="page">Detail Laporan</li>
+{% endblock %}
+
+{% block content %}
+<style>
+    .status-stepper { display: flex; justify-content: space-between; margin: 30px 0 50px; position: relative; }
+    .status-step { flex: 1; text-align: center; position: relative; z-index: 1; }
+    .step-icon { width: 48px; height: 48px; border-radius: 50%; background: white; border: 2px solid var(--gray-200); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: var(--gray-400); font-size: 1.2rem; transition: 0.3s; }
+    .step-label { font-size: 0.7rem; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; }
     
-    nav { background: white; border-bottom: 1px solid var(--gray-200); padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--dark); font-weight: 700; }
-    .nav-logo-box { width: 32px; height: 32px; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; }
-
-    main { max-width: 800px; margin: 40px auto; padding: 0 24px; animation: fadeUp 0.6s ease; }
+    .status-stepper::before { content: ""; position: absolute; top: 24px; left: 10%; right: 10%; height: 2px; background: var(--gray-200); z-index: 0; }
     
-    .detail-card { background: white; border-radius: 16px; border: 1px solid var(--gray-200); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-    .detail-header { padding: 32px; border-bottom: 1px solid var(--gray-200); background: linear-gradient(to right, #ffffff, #f8fafc); }
-    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; }
+    .step-active .step-icon { border-color: var(--brand); color: var(--brand); box-shadow: 0 0 0 5px var(--brand-pale); }
+    .step-completed .step-icon { background: var(--brand); border-color: var(--brand); color: white; }
     
-    /* Status Colors */
-    .status-REPORTED { background: #e0f2fe; color: #0369a1; }
-    .status-VERIFIED { background: #fef9c3; color: #854d0e; }
-    .status-IN_PROGRESS { background: #ffedd5; color: #9a3412; }
-    .status-RESOLVED { background: #dcfce7; color: #166534; }
+    .report-card { background: white; border-radius: 24px; border: 1px solid var(--gray-200); padding: 40px; }
+    .description-area { background: var(--gray-50); border-radius: 16px; padding: 25px; border: 1px dashed var(--gray-200); }
+</style>
 
-    .detail-body { padding: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-    .info-group { margin-bottom: 24px; }
-    .info-label { font-size: 0.75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .info-value { font-size: 1rem; font-weight: 500; color: var(--dark); line-height: 1.6; }
-    .full-width { grid-column: span 2; }
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="status-stepper">
+            <div class="status-step {% if report.status == 'REPORTED' %}step-active{% else %}step-completed{% endif %}">
+                <div class="step-icon">{% if report.status != 'REPORTED' %}<i class="bi bi-check-lg"></i>{% else %}<i class="bi bi-megaphone"></i>{% endif %}</div>
+                <div class="step-label">Diterima</div>
+            </div>
+            <div class="status-step {% if report.status == 'VERIFIED' %}step-active{% elif report.status == 'IN_PROGRESS' or report.status == 'RESOLVED' %}step-completed{% endif %}">
+                <div class="step-icon">{% if report.status == 'IN_PROGRESS' or report.status == 'RESOLVED' %}<i class="bi bi-check-lg"></i>{% else %}<i class="bi bi-shield-check"></i>{% endif %}</div>
+                <div class="step-label">Diverifikasi</div>
+            </div>
+            <div class="status-step {% if report.status == 'IN_PROGRESS' %}step-active{% elif report.status == 'RESOLVED' %}step-completed{% endif %}">
+                <div class="step-icon">{% if report.status == 'RESOLVED' %}<i class="bi bi-check-lg"></i>{% else %}<i class="bi bi-gear-wide-connected"></i>{% endif %}</div>
+                <div class="step-label">Diproses</div>
+            </div>
+            <div class="status-step {% if report.status == 'RESOLVED' %}step-active{% endif %}">
+                <div class="step-icon"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="step-label">Selesai</div>
+            </div>
+        </div>
 
-    .action-bar { background: var(--gray-50); padding: 20px 32px; display: flex; gap: 12px; border-top: 1px solid var(--gray-200); }
-    .btn { padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
-    .btn-primary { background: var(--brand); color: white; }
-    .btn-outline { border: 1px solid var(--gray-200); color: var(--gray-500); }
+        <div class="report-card shadow-sm mb-5">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <h1 class="fw-800 text-dark mb-0">{{ report.title }}</h1>
+                <span class="text-muted small fw-600 mt-2"><i class="bi bi-clock me-1"></i> {{ report.created_at|date:"d M Y" }}</span>
+            </div>
 
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
-</head>
-<body>
+            <div class="d-flex gap-2 mb-4">
+                <span class="badge bg-brand-pale text-primary px-3 py-2 fw-700 rounded-pill"># {{ report.get_category_display }}</span>
+                <span class="badge bg-light text-muted border px-3 py-2 fw-700 rounded-pill"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ report.location }}</span>
+            </div>
 
-<nav>
-  <a href="{% url 'home' %}" class="nav-logo">
-    <div class="nav-logo-box">SR</div>
-    <span>SmartReport</span>
-  </a>
-</nav>
+            <div class="description-area mb-5">
+                <h6 class="text-uppercase fw-800 small text-muted mb-3">Detail Deskripsi</h6>
+                <p class="fs-5 text-dark mb-0" style="line-height: 1.8;">{{ report.description }}</p>
+            </div>
 
-<main>
-  <div class="detail-card">
-    <div class="detail-header">
-      <span class="status-badge status-{{ report.status }}">{{ report.get_status_display }}</span>
-      <h1 style="margin: 0; font-size: 1.8rem; font-weight: 800;">{{ report.title }}</h1>
+            <div class="d-flex gap-3">
+                <a href="{% url 'report_update' report.pk %}" class="btn btn-primary px-4">Edit Laporan</a>
+                <a href="{% url 'report_list' %}" class="btn btn-light border px-4 fw-bold">Kembali ke Daftar</a>
+            </div>
+        </div>
     </div>
-
-    <div class="detail-body">
-      <div class="info-group">
-        <div class="info-label">Kategori Laporan</div>
-        <div class="info-value">{{ report.get_category_display }}</div>
-      </div>
-      <div class="info-group">
-        <div class="info-label">Lokasi Kejadian</div>
-        <div class="info-value">{{ report.location }}</div>
-      </div>
-      <div class="info-group full-width">
-        <div class="info-label">Deskripsi Lengkap</div>
-        <div class="info-value">{{ report.description }}</div>
-      </div>
-      <div class="info-group">
-        <div class="info-label">Tanggal Pelaporan</div>
-        <div class="info-value">🗓 {{ report.created_at|date:"d F Y, H:i" }}</div>
-      </div>
-    </div>
-
-    <div class="action-bar">
-      <a href="{% url 'report_list' %}" class="btn btn-outline">← Kembali</a>
-      <a href="{% url 'report_update' report.pk %}" class="btn btn-primary">Edit Laporan</a>
-    </div>
-  </div>
-</main>
-
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SmartReport — Konoha City{% endblock %}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --brand: #0ea5e9; --brand-deep: #0284c7; --brand-dark: #0369a1; --brand-pale: #e0f2fe;
+            --dark: #0c1220; --dark-mid: #1e293b; --white: #ffffff;
+            --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-400: #94a3b8; --gray-500: #64748b; --gray-700: #334155;
+            --grad-brand: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            --shadow-md: 0 4px 16px rgba(14,165,233,0.12), 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--white); 
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOPBAR --- */
+        .topbar {
+            background: var(--dark);
+            color: var(--gray-400);
+            font-size: 0.72rem;
+            padding: 7px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 1031;
+        }
+        .topbar-left { display: flex; gap: 20px; align-items: center; }
+        .topbar-left a { color: var(--gray-400); text-decoration: none; transition: color 0.2s; }
+        .topbar-left a:hover { color: var(--brand); }
+
+        /* --- NAV --- */
+        nav {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 48px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            transition: all 0.3s ease;
+            gap: 80px;
+        }
+        nav.scrolled { box-shadow: var(--shadow-md); }
+
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; position: absolute; left: 48px; }
+        .nav-logo-box {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: var(--grad-brand);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.78rem; color: var(--white);
+            box-shadow: 0 2px 8px rgba(14,165,233,0.4);
+        }
+        .nav-logo-text { font-weight: 700; font-size: 1rem; color: var(--dark); }
+        .nav-logo-text em { font-style: normal; color: var(--brand-deep); }
+
+        .nav-links { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; }
+        .nav-links li a {
+            text-decoration: none; color: var(--gray-700); font-size: 0.86rem; font-weight: 500;
+            padding: 6px 14px; border-radius: 6px; transition: all 0.25s ease;
+        }
+        .nav-links li a:hover { color: var(--brand-deep); background: var(--brand-pale); transform: translateY(-2px); }
+        .nav-links li a.active { color: var(--brand-deep); background: var(--brand-pale); }
+
+        /* --- STICKY BREADCRUMB --- */
+        .sticky-breadcrumb {
+            position: sticky;
+            top: 64px;
+            z-index: 1010;
+            background-color: rgba(251, 252, 253, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 12px 48px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- BREADCRUMB --- */
+        .breadcrumb-section { background: transparent; border-bottom: none; padding: 0; display: flex; align-items: center; }
+        .breadcrumb { margin-bottom: 0; font-size: 0.8rem; font-weight: 600; }
+        .breadcrumb-item { color: var(--gray-500); }
+        .breadcrumb-item a { color: var(--brand); text-decoration: none; transition: color 0.25s ease; }
+        .breadcrumb-item a:hover { color: var(--brand-deep); }
+        .breadcrumb-item.active { color: var(--gray-700); font-weight: 600; }
+
+        footer {
+            border-top: 1px solid var(--gray-200);
+            padding: 20px 48px; display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; color: var(--gray-500); margin-top: auto;
+        }
+        .foot-brand { color: var(--brand-deep); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <a href="tel:+628210000000">📞 +62 821 0000 0000</a>
+        <span style="color: var(--dark-mid)">·</span>
+        <a href="mailto:smartreport@konoha.go.id">✉ bantuan@smartreport.id</a>
+    </div>
+    <div class="d-none d-md-block">Bahasa: Indonesia ▾</div>
+</div>
+
+<nav id="mainNav">
+    <a href="{% url 'home' %}" class="nav-logo">
+        <div class="nav-logo-box">SR</div>
+        <span class="nav-logo-text">Smart <em>Report</em></span>
+    </a>
+    
+    <ul class="nav-links d-none d-lg-flex">
+        <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+        <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
+        <li><a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a></li>
+        <li><a href="{% url 'report_list' %}" class="{% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">Daftar Laporan</a></li>
+    </ul>
+</nav>
+
+{% if request.resolver_match.url_name != 'home' %}
+<div class="sticky-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+            {% block breadcrumb %}{% endblock %}
+        </ol>
+    </nav>
+</div>
+{% endif %}
+
+<div class="{% if request.resolver_match.url_name == 'home' %}container-fluid p-0{% else %}container mt-5 mb-5{% endif %}">
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0" role="alert">
+                    <div class="d-flex align-items-center">
+                        {% if message.tags == 'success' %}
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% endif %}
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    <span>© 2026 <span class="foot-brand">SmartReport</span> — Sistem Pelaporan Kota Konoha</span>
+    <span>Dibuat untuk warga Konoha</span>
+</footer>
+
+<script>
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
