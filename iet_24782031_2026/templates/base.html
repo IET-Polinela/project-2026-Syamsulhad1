@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    {% block extra_head %}{% endblock %}
 
     <style>
         :root {
@@ -45,7 +46,7 @@
         .topbar-left a:hover { color: var(--brand); }
 
         /* --- NAV --- */
-        nav {
+        .main-nav {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -61,7 +62,7 @@
             transition: all 0.3s ease;
             gap: 80px;
         }
-        nav.scrolled { box-shadow: var(--shadow-md); }
+        .main-nav.scrolled { box-shadow: var(--shadow-md); }
 
         .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; position: absolute; left: 48px; }
         .nav-logo-box {
@@ -71,16 +72,127 @@
             font-weight: 800; font-size: 0.78rem; color: var(--white);
             box-shadow: 0 2px 8px rgba(14,165,233,0.4);
         }
+        .nav-logo-copy { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; }
         .nav-logo-text { font-weight: 700; font-size: 1rem; color: var(--dark); }
         .nav-logo-text em { font-style: normal; color: var(--brand-deep); }
+        .nav-logo-user { font-size: 0.72rem; color: var(--gray-500); font-weight: 600; }
+        .nav-logo-role { color: var(--brand-deep); font-weight: 700; }
 
         .nav-links { list-style: none; display: flex; gap: 4px; margin: 0; padding: 0; }
         .nav-links li a {
             text-decoration: none; color: var(--gray-700); font-size: 0.86rem; font-weight: 500;
             padding: 6px 14px; border-radius: 6px; transition: all 0.25s ease;
         }
-        .nav-links li a:hover { color: var(--brand-deep); background: var(--brand-pale); transform: translateY(-2px); }
+        .nav-links li a:hover { color: var(--brand-deep); background: var(--brand-pale); }
         .nav-links li a.active { color: var(--brand-deep); background: var(--brand-pale); }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: absolute;
+            right: 48px;
+        }
+        .nav-auth-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s, filter 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .nav-auth-btn:hover { transform: translateY(-1px); }
+        .nav-auth-primary {
+            background: var(--grad-brand);
+            color: var(--white);
+            box-shadow: 0 2px 10px rgba(14,165,233,0.35);
+            border: none;
+        }
+        .nav-auth-primary:hover {
+            box-shadow: 0 6px 20px rgba(14,165,233,0.45);
+            filter: brightness(1.05);
+            color: var(--white);
+        }
+        .nav-auth-outline {
+            background: transparent;
+            color: var(--brand-deep);
+            border: 1px solid rgba(14,165,233,0.32);
+        }
+        .nav-auth-outline:hover { background: var(--brand-pale); color: var(--brand-deep); }
+        .nav-auth-logout {
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid rgba(239,68,68,0.28);
+        }
+        .nav-auth-logout:hover { background: #fef2f2; color: #dc2626; }
+        .nav-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            background: var(--white);
+            color: var(--dark);
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .nav-toggle:hover { background: var(--gray-50); transform: translateY(-1px); }
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 16px;
+            right: 16px;
+            z-index: 1025;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--gray-200);
+            border-radius: 18px;
+            box-shadow: 0 18px 50px rgba(12,18,32,0.14);
+            padding: 18px;
+        }
+        .mobile-nav.open { display: block; }
+        .mobile-nav-links,
+        .mobile-nav-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .mobile-nav-links a,
+        .mobile-nav-actions a,
+        .mobile-nav-actions button {
+            width: 100%;
+            text-align: left;
+            text-decoration: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .mobile-nav-links a {
+            color: var(--gray-700);
+            background: var(--gray-50);
+        }
+        .mobile-nav-links a.active {
+            color: var(--brand-deep);
+            background: var(--brand-pale);
+        }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 14px 0;
+        }
+        .mobile-nav-actions .btn,
+        .mobile-nav-actions button {
+            border-radius: 12px;
+        }
 
         /* --- STICKY BREADCRUMB --- */
         .sticky-breadcrumb {
@@ -89,21 +201,134 @@
             z-index: 1010;
             background-color: rgba(251, 252, 253, 0.95);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--gray-200);
             padding: 12px 48px;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
         }
-
-        /* --- BREADCRUMB --- */
-        .breadcrumb-section { background: transparent; border-bottom: none; padding: 0; display: flex; align-items: center; }
         .breadcrumb { margin-bottom: 0; font-size: 0.8rem; font-weight: 600; }
-        .breadcrumb-item { color: var(--gray-500); }
-        .breadcrumb-item a { color: var(--brand); text-decoration: none; transition: color 0.25s ease; }
-        .breadcrumb-item a:hover { color: var(--brand-deep); }
+        .breadcrumb-item a { color: var(--brand); text-decoration: none; }
         .breadcrumb-item.active { color: var(--gray-700); font-weight: 600; }
+
+        /* --- TOAST CONTAINER --- */
+        #toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 320px;
+        }
+
+        /* --- SINGLE TOAST --- */
+        .sr-toast {
+            width: 320px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .sr-toast.hide {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        .sr-toast-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 14px 14px 16px;
+        }
+        .sr-toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .sr-toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .sr-toast-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .sr-toast-text {
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #334155;
+            line-height: 1.4;
+            white-space: normal;
+            word-break: break-word;
+        }
+        .sr-toast-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+            padding: 0;
+            line-height: 1;
+        }
+        .sr-toast-close:hover {
+            background: #f1f5f9;
+            color: #0c1220;
+        }
+        .sr-toast-bar {
+            height: 3px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        /* SUCCESS */
+        .sr-toast-success .sr-toast-icon { background: #dcfce7; color: #16a34a; }
+        .sr-toast-success .sr-toast-label { color: #16a34a; }
+        .sr-toast-success .sr-toast-bar { background: #22c55e; animation: shrinkBar 4s linear forwards; }
+        .sr-toast-success { border-left: 4px solid #22c55e; }
+
+        /* ERROR */
+        .sr-toast-error .sr-toast-icon { background: #fee2e2; color: #dc2626; }
+        .sr-toast-error .sr-toast-label { color: #dc2626; }
+        .sr-toast-error .sr-toast-bar { background: #ef4444; animation: shrinkBar 4s linear forwards; }
+        .sr-toast-error { border-left: 4px solid #ef4444; }
+
+        /* WARNING */
+        .sr-toast-warning .sr-toast-icon { background: #fef3c7; color: #d97706; }
+        .sr-toast-warning .sr-toast-label { color: #d97706; }
+        .sr-toast-warning .sr-toast-bar { background: #f59e0b; animation: shrinkBar 4s linear forwards; }
+        .sr-toast-warning { border-left: 4px solid #f59e0b; }
+
+        /* INFO */
+        .sr-toast-info .sr-toast-icon { background: #e0f2fe; color: #0284c7; }
+        .sr-toast-info .sr-toast-label { color: #0284c7; }
+        .sr-toast-info .sr-toast-bar { background: #0ea5e9; animation: shrinkBar 4s linear forwards; }
+        .sr-toast-info { border-left: 4px solid #0ea5e9; }
+
+        @keyframes shrinkBar {
+            from { transform: scaleX(1); }
+            to   { transform: scaleX(0); }
+        }
 
         footer {
             border-top: 1px solid var(--gray-200);
@@ -111,6 +336,63 @@
             font-size: 0.75rem; color: var(--gray-500); margin-top: auto;
         }
         .foot-brand { color: var(--brand-deep); font-weight: 700; }
+
+        @media (max-width: 991.98px) {
+            .topbar {
+                padding: 8px 18px;
+                font-size: 0.68rem;
+            }
+            .topbar-left {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .main-nav {
+                height: auto;
+                min-height: 64px;
+                padding: 12px 18px;
+                justify-content: space-between;
+                gap: 14px;
+            }
+            .nav-logo {
+                position: static;
+                min-width: 0;
+                flex: 1;
+            }
+            .nav-logo-text {
+                font-size: 0.94rem;
+            }
+            .nav-logo-user {
+                font-size: 0.68rem;
+            }
+            .nav-links,
+            .nav-actions {
+                display: none !important;
+            }
+            .nav-toggle {
+                display: inline-flex;
+                flex-shrink: 0;
+            }
+            .sticky-breadcrumb {
+                top: 88px;
+                padding: 10px 18px;
+                overflow-x: auto;
+            }
+            #toast-container {
+                top: 96px;
+                right: 16px;
+                left: 16px;
+                width: auto;
+            }
+            .sr-toast {
+                width: 100%;
+            }
+            footer {
+                padding: 16px 18px;
+                flex-direction: column;
+                gap: 6px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -124,50 +406,140 @@
     <div class="d-none d-md-block">Bahasa: Indonesia ▾</div>
 </div>
 
-<nav id="mainNav">
+<nav class="main-nav" id="mainNav">
     <a href="{% url 'home' %}" class="nav-logo">
         <div class="nav-logo-box">SR</div>
-        <span class="nav-logo-text">Smart <em>Report</em></span>
+        <span class="nav-logo-copy">
+            <span class="nav-logo-text">Smart <em>Report</em></span>
+            {% if user.is_authenticated %}
+                <span class="nav-logo-user">{{ user.username }} <span class="nav-logo-role">({% if user.is_admin %}Admin{% else %}Citizen{% endif %})</span></span>
+            {% endif %}
+        </span>
     </a>
     
     <ul class="nav-links d-none d-lg-flex">
-        <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
-        <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
-        <li><a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a></li>
+        <li><a href="{% url 'home' %}"        class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+        <li><a href="{% url 'about' %}"       class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
+        <li><a href="{% url 'contacts' %}"    class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a></li>
         <li><a href="{% url 'report_list' %}" class="{% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">Daftar Laporan</a></li>
     </ul>
+    
+    <div class="nav-actions d-flex align-items-center gap-3">
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}" class="d-inline mb-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-auth-btn nav-auth-logout">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="nav-auth-btn nav-auth-primary">
+                Login
+            </a>
+            <a href="{% url 'register' %}" class="nav-auth-btn nav-auth-outline">
+                Register
+            </a>
+        {% endif %}
+    </div>
+    <button type="button" class="nav-toggle" id="mobileNavToggle" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="mobileNavMenu">
+        <i class="bi bi-list"></i>
+    </button>
 </nav>
+
+<div class="mobile-nav" id="mobileNavMenu">
+    <div class="mobile-nav-links">
+        <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+        <a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+        <a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a>
+        <a href="{% url 'report_list' %}" class="{% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">Daftar Laporan</a>
+    </div>
+    <div class="mobile-nav-divider"></div>
+    <div class="mobile-nav-actions">
+        {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}" class="mb-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-auth-btn nav-auth-logout w-100">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="nav-auth-btn nav-auth-primary w-100">
+                Login
+            </a>
+            <a href="{% url 'register' %}" class="nav-auth-btn nav-auth-outline w-100">
+                Register
+            </a>
+        {% endif %}
+    </div>
+</div>
 
 {% if request.resolver_match.url_name != 'home' %}
 <div class="sticky-breadcrumb">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
             {% block breadcrumb %}{% endblock %}
         </ol>
     </nav>
 </div>
 {% endif %}
 
-<div class="{% if request.resolver_match.url_name == 'home' %}container-fluid p-0{% else %}container mt-5 mb-5{% endif %}">
-    <div class="container mt-3">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0" role="alert">
-                    <div class="d-flex align-items-center">
-                        {% if message.tags == 'success' %}
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                        {% else %}
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        {% endif %}
-                        <div>{{ message }}</div>
+<!-- TOAST CONTAINER -->
+<div id="toast-container">
+    {% for message in messages %}
+        {% if 'success' in message.tags %}
+            <div class="sr-toast sr-toast-success">
+                <div class="sr-toast-inner">
+                    <div class="sr-toast-icon"><i class="bi bi-check-circle-fill"></i></div>
+                    <div class="sr-toast-content">
+                        <div class="sr-toast-label">Berhasil!</div>
+                        <div class="sr-toast-text">{{ message }}</div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
                 </div>
-            {% endfor %}
+                <div class="sr-toast-bar"></div>
+            </div>
+        {% elif 'error' in message.tags %}
+            <div class="sr-toast sr-toast-error">
+                <div class="sr-toast-inner">
+                    <div class="sr-toast-icon"><i class="bi bi-x-circle-fill"></i></div>
+                    <div class="sr-toast-content">
+                        <div class="sr-toast-label">Gagal!</div>
+                        <div class="sr-toast-text">{{ message }}</div>
+                    </div>
+                    <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="sr-toast-bar"></div>
+            </div>
+        {% elif 'warning' in message.tags %}
+            <div class="sr-toast sr-toast-warning">
+                <div class="sr-toast-inner">
+                    <div class="sr-toast-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div class="sr-toast-content">
+                        <div class="sr-toast-label">Peringatan!</div>
+                        <div class="sr-toast-text">{{ message }}</div>
+                    </div>
+                    <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="sr-toast-bar"></div>
+            </div>
+        {% else %}
+            <div class="sr-toast sr-toast-info">
+                <div class="sr-toast-inner">
+                    <div class="sr-toast-icon"><i class="bi bi-info-circle-fill"></i></div>
+                    <div class="sr-toast-content">
+                        <div class="sr-toast-label">Info</div>
+                        <div class="sr-toast-text">{{ message }}</div>
+                    </div>
+                    <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="sr-toast-bar"></div>
+            </div>
         {% endif %}
-    </div>
+    {% endfor %}
+</div>
 
+<div class="{% if request.resolver_match.url_name == 'home' %}container-fluid p-0{% else %}container mt-5 mb-5{% endif %}">
     {% block content %}{% endblock %}
 </div>
 
@@ -176,13 +548,56 @@
     <span>Dibuat untuk warga Konoha</span>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    const nav = document.getElementById('mainNav');
-    window.addEventListener('scroll', () => {
-        nav.classList.toggle('scrolled', window.scrollY > 10);
+    // Nav scroll shadow
+    const mainNav = document.getElementById('mainNav');
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const mobileNavMenu = document.getElementById('mobileNavMenu');
+    window.addEventListener('scroll', function() {
+        mainNav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+    if (mobileNavToggle && mobileNavMenu) {
+        mobileNavToggle.addEventListener('click', function() {
+            const isOpen = mobileNavMenu.classList.toggle('open');
+            mobileNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 991) {
+                mobileNavMenu.classList.remove('open');
+                mobileNavToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    // Tutup toast
+    function closeToast(btn) {
+        var toast = btn.closest('.sr-toast');
+        toast.classList.add('hide');
+        setTimeout(function() {
+            toast.remove();
+        }, 300);
+    }
+
+    // Auto close semua toast setelah 4 detik
+    window.addEventListener('load', function() {
+        var toasts = document.querySelectorAll('.sr-toast');
+        toasts.forEach(function(toast, index) {
+            setTimeout(function() {
+                if (document.body.contains(toast)) {
+                    toast.classList.add('hide');
+                    setTimeout(function() {
+                        if (document.body.contains(toast)) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 4000 + (index * 300));
+        });
     });
 </script>
+{% block extra_script %}{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

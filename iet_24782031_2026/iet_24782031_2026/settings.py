@@ -29,7 +29,10 @@ INSTALLED_APPS = [
     'main_app',
     'about',
     'contacts',
+    'usermanagement_24782031',
 ]
+
+AUTH_USER_MODEL = 'usermanagement_24782031.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,7 +72,7 @@ WSGI_APPLICATION = 'iet_24782031_2026.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'smartcity_db',
+        'NAME': 'smart_city_db',
         'USER': 'postgres',
         'PASSWORD': '24782031',
         'HOST': 'localhost',

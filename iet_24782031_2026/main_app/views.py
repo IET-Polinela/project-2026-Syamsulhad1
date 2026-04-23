@@ -1,13 +1,29 @@
-from django import forms 
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from django import forms
 from django.contrib import messages
-from .models import Report, STATUS_CHOICES
-from .forms import ReportForm
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views import View
+from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
-# 1. HomeView (Ini yang menyebabkan error AttributeError: HomeView)
+from .forms import ReportForm
+from .models import Report
+
+
+def user_is_app_admin(user):
+    return user.is_authenticated and getattr(user, 'is_admin', False)
+
+
+def redirect_non_admin(request):
+    messages.error(request, "Akses ditolak! Hanya admin yang bisa melakukan aksi ini.")
+    return redirect('report_list')
+
+class AdminRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not user_is_app_admin(request.user):
+            return redirect_non_admin(request)
+        return super().dispatch(request, *args, **kwargs)
+
+# 1. HomeView
 class HomeView(TemplateView):
     template_name = 'main_app/home.html'
 
@@ -18,15 +34,12 @@ class HomeView(TemplateView):
 
 # 2. report_list
 def report_list(request):
-    # Ambil data awal
     reports = Report.objects.all().order_by('-created_at')
 
-    # Logika Pencarian
     search_query = request.GET.get('search')
     if search_query:
         reports = reports.filter(title__icontains=search_query) | reports.filter(location__icontains=search_query)
 
-    # Logika Filter Kategori
     category_filter = request.GET.get('category')
     if category_filter:
         reports = reports.filter(category=category_filter)
@@ -39,77 +52,66 @@ class ReportDetailView(DetailView):
     template_name = 'main_app/report_detail.html'
 
 # 4. ReportCreateView
-class ReportCreateView(CreateView):
+class ReportCreateView(AdminRequiredMixin, CreateView):
     model = Report
     form_class = ReportForm
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
-    
-    def get_form(self, *args, **kwargs):
-        form = super().get_form(*args, **kwargs)
-        # SAAT CREATE: Sembunyikan pilihan status agar tidak bisa dimanipulasi
-        # Status akan otomatis mengikuti default dari model (REPORTED)
-        if 'status' in form.fields:
-            form.fields['status'].widget = forms.HiddenInput()
-        return form
 
     def form_valid(self, form):
-        # Memastikan status adalah REPORTED saat pertama kali dibuat
-        form.instance.status = 'REPORTED'
-        messages.success(self.request, "Laporan berhasil ditambahkan!")
+        messages.success(self.request, "Laporan berhasil dibuat!")
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        messages.error(self.request, "Laporan gagal dibuat. Periksa kembali data yang diisi.")
+        return super().form_invalid(form)
+
 # 5. ReportUpdateView (Sistem Anti-Rollback)
-class ReportUpdateView(UpdateView):
+class ReportUpdateView(AdminRequiredMixin, UpdateView):
     model = Report
-    form_class = ReportForm
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
 
     def dispatch(self, request, *args, **kwargs):
-        # Cek status laporan sebelum allow edit
         self.object = self.get_object()
         if self.object.status == 'RESOLVED':
             messages.error(request, "Laporan yang sudah selesai tidak dapat diedit. Silakan lihat detail laporan untuk informasi lebih lanjut.")
             return redirect('report_detail', pk=self.object.pk)
         return super().dispatch(request, *args, **kwargs)
 
-    def get_form(self, *args, **kwargs):
-        form = super().get_form(*args, **kwargs)
-        current_status = self.object.status
-        
-        # Ambil kunci status dari model
-        status_keys = [choice[0] for choice in STATUS_CHOICES]
-        current_index = status_keys.index(current_status)
-        
-        # ATURAN WORKFLOW:
-        # Index 0: REPORTED, 1: VERIFIED, 2: IN_PROGRESS, 3: RESOLVED
-        if current_status == 'RESOLVED':
-            # Jika sudah Resolved, tidak ada pilihan perubahan (readonly)
-            allowed_choices = [(current_status, 'Resolved')]
-        else:
-            # Ambil status saat ini dan TEPAT satu status setelahnya
-            allowed_choices = [STATUS_CHOICES[current_index], STATUS_CHOICES[current_index + 1]]
-        
-        form.fields['status'].choices = allowed_choices
-        return form
+    def get_form_class(self):
+        class UpdateReportForm(forms.ModelForm):
+            class Meta:
+                model = Report
+                fields = ['title', 'category', 'description', 'location']
+                widgets = {
+                    'title': forms.TextInput(attrs={'placeholder': 'Judul Laporan'}),
+                    'category': forms.Select(), 
+                    'description': forms.Textarea(attrs={'placeholder': 'Jelaskan detail masalah...', 'rows': 4}),
+                    'location': forms.TextInput(attrs={'placeholder': 'Lokasi kejadian'}),
+                }
+        return UpdateReportForm
 
     def form_valid(self, form):
-        messages.info(self.request, "Laporan berhasil diperbarui.")
+        messages.success(self.request, "Laporan berhasil diperbarui!")
         return super().form_valid(form)
-    
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Gagal memperbarui laporan. Periksa kembali data yang diisi.")
+        return super().form_invalid(form)
+
 # 6. ReportDeleteView
-class ReportDeleteView(DeleteView):
+class ReportDeleteView(AdminRequiredMixin, DeleteView):
     model = Report
     template_name = 'main_app/report_delete.html'
     success_url = reverse_lazy('report_list')
-    
-    def delete(self, request, *args, **kwargs):
-        messages.warning(self.request, "Laporan telah dihapus.")
-        return super().delete(request, *args, **kwargs)
 
-# 7. ReportUpdateStatusView (Ini yang menyebabkan error AttributeError: ReportUpdateStatusView)
-class ReportUpdateStatusView(View):
+    def form_valid(self, form):
+        messages.success(self.request, "Laporan berhasil dihapus.")
+        return super().form_valid(form)
+
+# 7. ReportUpdateStatusView
+class ReportUpdateStatusView(AdminRequiredMixin, View):
     def post(self, request, pk):
         report = get_object_or_404(Report, pk=pk)
         new_status = request.POST.get('status')
@@ -117,17 +119,21 @@ class ReportUpdateStatusView(View):
             report.status = new_status
             report.save()
             messages.success(request, "Status berhasil diperbarui!")
+        else:
+            messages.error(request, "Status tidak valid.")
         return redirect('report_list')
 
 # Function view untuk update status via GET
 def update_status(request, pk, new_status):
+    if not user_is_app_admin(request.user):
+        return redirect_non_admin(request)
+
     report = get_object_or_404(Report, pk=pk)
-    # Validasi workflow: hanya allow transisi yang valid
     valid_transitions = {
         'REPORTED': ['VERIFIED'],
         'VERIFIED': ['IN_PROGRESS'],
         'IN_PROGRESS': ['RESOLVED'],
-        'RESOLVED': []  # Tidak bisa diubah lagi
+        'RESOLVED': []
     }
     if new_status in valid_transitions.get(report.status, []):
         report.status = new_status

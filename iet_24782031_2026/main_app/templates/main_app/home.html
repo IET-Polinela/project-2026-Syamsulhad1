@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartReport — Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -49,7 +50,7 @@
     .topbar-left a:hover { color: var(--brand); }
     .topbar-dot { color: var(--dark-mid); }
 
-    /* ─── NAV (SHARED) ─── */
+    /* ─── NAV ─── */
     nav {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(12px);
@@ -68,9 +69,7 @@
     }
     nav.scrolled { box-shadow: var(--shadow-md); }
 
-    .nav-logo {
-      display: flex; align-items: center; gap: 10px; text-decoration: none;
-    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .nav-logo-box {
       width: 36px; height: 36px; border-radius: 8px;
       background: var(--grad-brand);
@@ -82,23 +81,65 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .nav-logo:hover .nav-logo-box { transform: scale(1.08); box-shadow: 0 4px 14px rgba(14,165,233,0.5); }
+    .nav-logo-copy { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; }
     .nav-logo-text { font-weight: 700; font-size: 1rem; color: var(--dark); letter-spacing: -0.01em; }
     .nav-logo-text em { font-style: normal; color: var(--brand-deep); }
+    .nav-logo-user { font-size: 0.72rem; color: var(--gray-500); font-weight: 600; }
+    .nav-logo-role { color: var(--brand-deep); font-weight: 700; }
 
     nav ul { list-style: none; display: flex; gap: 4px; justify-content: center; }
     nav ul li a {
       text-decoration: none; color: var(--gray-700); font-size: 0.86rem; font-weight: 500;
       padding: 6px 14px; border-radius: 6px;
       transition: color 0.2s, background 0.2s;
-      position: relative;
     }
     nav ul li a:hover { color: var(--brand-deep); background: var(--brand-pale); }
-    nav ul li a.active {
-      color: var(--brand-deep); font-weight: 600;
-      background: var(--brand-pale);
-    }
+    nav ul li a.active { color: var(--brand-deep); font-weight: 600; background: var(--brand-pale); }
 
     .nav-right { display: flex; justify-content: flex-end; }
+    .nav-toggle {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--dark);
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 80px;
+      left: 16px;
+      right: 16px;
+      z-index: 220;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--gray-200);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(12,18,32,0.14);
+      padding: 18px;
+    }
+    .mobile-nav.open { display: block; }
+    .mobile-nav-links,
+    .mobile-nav-actions { display: flex; flex-direction: column; gap: 10px; }
+    .mobile-nav-links a,
+    .mobile-nav-actions a {
+      width: 100%;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    .mobile-nav-links a { color: var(--gray-700); background: var(--gray-50); }
+    .mobile-nav-links a.active { color: var(--brand-deep); background: var(--brand-pale); }
+    .mobile-nav-divider { height: 1px; background: var(--gray-200); margin: 14px 0; }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--grad-brand);
@@ -111,6 +152,117 @@
     }
     .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,233,0.45); filter: brightness(1.05); }
 
+    /* ─── TOAST ─── */
+    #toast-container {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 320px;
+      pointer-events: none;
+    }
+    .sr-toast {
+      pointer-events: all;
+      width: 320px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .sr-toast.hide {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    .sr-toast-inner {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px 14px 16px;
+    }
+    .sr-toast-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .sr-toast-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .sr-toast-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 3px;
+    }
+    .sr-toast-text {
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .sr-toast-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+      padding: 0;
+    }
+    .sr-toast-close:hover { background: #f1f5f9; color: #0c1220; }
+    .sr-toast-bar {
+      height: 3px;
+      width: 100%;
+      transform-origin: left;
+      animation: shrinkBar 4s linear forwards;
+    }
+    /* success */
+    .sr-toast-success { border-left: 4px solid #22c55e; }
+    .sr-toast-success .sr-toast-icon { background: #dcfce7; color: #16a34a; }
+    .sr-toast-success .sr-toast-label { color: #16a34a; }
+    .sr-toast-success .sr-toast-bar { background: #22c55e; }
+    /* error */
+    .sr-toast-error { border-left: 4px solid #ef4444; }
+    .sr-toast-error .sr-toast-icon { background: #fee2e2; color: #dc2626; }
+    .sr-toast-error .sr-toast-label { color: #dc2626; }
+    .sr-toast-error .sr-toast-bar { background: #ef4444; }
+    /* warning */
+    .sr-toast-warning { border-left: 4px solid #f59e0b; }
+    .sr-toast-warning .sr-toast-icon { background: #fef3c7; color: #d97706; }
+    .sr-toast-warning .sr-toast-label { color: #d97706; }
+    .sr-toast-warning .sr-toast-bar { background: #f59e0b; }
+    /* info */
+    .sr-toast-info { border-left: 4px solid #0ea5e9; }
+    .sr-toast-info .sr-toast-icon { background: #e0f2fe; color: #0284c7; }
+    .sr-toast-info .sr-toast-label { color: #0284c7; }
+    .sr-toast-info .sr-toast-bar { background: #0ea5e9; }
+
+    @keyframes shrinkBar {
+      from { transform: scaleX(1); }
+      to   { transform: scaleX(0); }
+    }
+
     /* ─── HERO ─── */
     .hero {
       position: relative;
@@ -121,7 +273,6 @@
       padding: 80px 48px;
       overflow: hidden;
     }
-    /* animated gradient orb */
     .hero::before {
       content: '';
       position: absolute;
@@ -168,6 +319,7 @@
       display: flex; gap: 14px; flex-wrap: wrap;
       animation: fadeUp 0.7s ease 0.5s both;
     }
+    .hero-auth { animation: fadeUp 0.7s ease 0.6s both; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--grad-brand); color: var(--white);
@@ -175,6 +327,7 @@
       font-size: 0.875rem; font-weight: 700; text-decoration: none;
       box-shadow: 0 4px 16px rgba(14,165,233,0.4);
       transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      border: none; cursor: pointer;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.5); filter: brightness(1.05); }
     .btn-ghost {
@@ -182,8 +335,20 @@
       box-shadow: none;
     }
     .btn-ghost:hover { border-color: var(--brand); color: #7dd3fc; background: rgba(14,165,233,0.1); box-shadow: none; filter: none; }
+    .btn-outline-light {
+      background: transparent; border: 1.5px solid rgba(255,255,255,0.5); color: var(--white);
+      padding: 8px 18px; border-radius: 20px; font-size: 0.82rem;
+      box-shadow: none;
+    }
+    .btn-outline-light:hover { background: rgba(255,255,255,0.15); border-color: white; }
+    .btn-light {
+      background: white; color: var(--brand-deep);
+      padding: 8px 18px; border-radius: 20px; font-size: 0.82rem;
+      box-shadow: none;
+    }
+    .btn-light:hover { background: var(--brand-pale); }
 
-    /* ─── SERVICE CARDS ─── */
+    /* ─── SERVICES ─── */
     .services {
       display: grid; grid-template-columns: repeat(3, 1fr);
       border-top: 1px solid var(--gray-200);
@@ -239,15 +404,30 @@
     @keyframes pulse { 0%,100% { transform: scale(1); opacity:1; } 50% { transform: scale(1.12); opacity:0.7; } }
     @keyframes ping { 0%,100% { transform: scale(1); opacity:1; } 50% { transform: scale(1.5); opacity:0.4; } }
 
-    /* ─── SCROLL-REVEAL ─── */
     .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+    @media (max-width: 991.98px) {
+      .topbar { padding: 6px 16px; font-size: 0.68rem; }
+      .topbar-left { gap: 10px; flex-wrap: wrap; }
+      nav {
+        padding: 12px 16px;
+        height: auto;
+        min-height: 64px;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+      }
+      nav ul, .nav-right { display: none; }
+      .nav-toggle { display: inline-flex; }
+      .hero { padding: 70px 20px; min-height: 420px; }
+      .hero-content { max-width: 100%; }
+      .hero h1 { font-size: 2.15rem; }
+      #toast-container { width: calc(100vw - 32px); right: 16px; }
+      .sr-toast { width: 100%; }
+    }
+
     @media (max-width: 768px) {
       .topbar { padding: 6px 20px; font-size: 0.68rem; }
-      nav { padding: 0 20px; }
-      nav ul { gap: 2px; }
-      nav ul li a { padding: 5px 8px; font-size: 0.78rem; }
       .hero { padding: 60px 20px; min-height: 400px; }
       .hero h1 { font-size: 2rem; }
       .services { grid-template-columns: 1fr; }
@@ -255,12 +435,71 @@
       .stats { padding: 20px; flex-wrap: wrap; }
       .stat { min-width: 50%; border-right: none; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
       footer { flex-direction: column; gap: 6px; padding: 16px 20px; text-align: center; }
+      #toast-container { width: calc(100vw - 40px); right: 20px; }
+      .sr-toast { width: 100%; }
     }
   </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
+<!-- ─── TOAST CONTAINER ─── -->
+{% if messages %}
+<div id="toast-container">
+  {% for message in messages %}
+    {% if 'success' in message.tags %}
+    <div class="sr-toast sr-toast-success">
+      <div class="sr-toast-inner">
+        <div class="sr-toast-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="sr-toast-content">
+          <div class="sr-toast-label">Berhasil!</div>
+          <div class="sr-toast-text">{{ message }}</div>
+        </div>
+        <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="sr-toast-bar"></div>
+    </div>
+    {% elif 'error' in message.tags %}
+    <div class="sr-toast sr-toast-error">
+      <div class="sr-toast-inner">
+        <div class="sr-toast-icon"><i class="bi bi-x-circle-fill"></i></div>
+        <div class="sr-toast-content">
+          <div class="sr-toast-label">Gagal!</div>
+          <div class="sr-toast-text">{{ message }}</div>
+        </div>
+        <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="sr-toast-bar"></div>
+    </div>
+    {% elif 'warning' in message.tags %}
+    <div class="sr-toast sr-toast-warning">
+      <div class="sr-toast-inner">
+        <div class="sr-toast-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="sr-toast-content">
+          <div class="sr-toast-label">Peringatan!</div>
+          <div class="sr-toast-text">{{ message }}</div>
+        </div>
+        <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="sr-toast-bar"></div>
+    </div>
+    {% else %}
+    <div class="sr-toast sr-toast-info">
+      <div class="sr-toast-inner">
+        <div class="sr-toast-icon"><i class="bi bi-info-circle-fill"></i></div>
+        <div class="sr-toast-content">
+          <div class="sr-toast-label">Info</div>
+          <div class="sr-toast-text">{{ message }}</div>
+        </div>
+        <button class="sr-toast-close" onclick="closeToast(this)"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="sr-toast-bar"></div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ─── TOPBAR ─── -->
 <div class="topbar">
   <div class="topbar-left">
     <a href="tel:+628210000000">📞 +62 821 0000 0000</a>
@@ -270,11 +509,16 @@
   <div>Bahasa: Indonesia ▾</div>
 </div>
 
-<!-- NAV -->
+<!-- ─── NAV ─── -->
 <nav id="mainNav">
   <a href="{% url 'home' %}" class="nav-logo">
     <div class="nav-logo-box">SR</div>
-    <span class="nav-logo-text">Smart <em>Report</em></span>
+    <span class="nav-logo-copy">
+      <span class="nav-logo-text">Smart <em>Report</em></span>
+      {% if user.is_authenticated %}
+        <span class="nav-logo-user">{{ user.username }} <span class="nav-logo-role">({% if user.is_admin %}Admin{% else %}Citizen{% endif %})</span></span>
+      {% endif %}
+    </span>
   </a>
   <ul>
     <li><a href="{% url 'home' %}" class="active">Home</a></li>
@@ -285,9 +529,25 @@
   <div class="nav-right">
     <a href="{% url 'report_list' %}" class="nav-cta">Buat Laporan →</a>
   </div>
+  <button type="button" class="nav-toggle" id="mobileNavToggle" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="mobileNavMenu">
+    <i class="bi bi-list"></i>
+  </button>
 </nav>
 
-<!-- HERO -->
+<div class="mobile-nav" id="mobileNavMenu">
+  <div class="mobile-nav-links">
+    <a href="{% url 'home' %}" class="active">Home</a>
+    <a href="{% url 'about' %}">About</a>
+    <a href="{% url 'contacts' %}">Contacts</a>
+    <a href="{% url 'report_list' %}">Daftar Laporan</a>
+  </div>
+  <div class="mobile-nav-divider"></div>
+  <div class="mobile-nav-actions">
+    <a href="{% url 'report_list' %}" class="btn">Buat Laporan</a>
+  </div>
+</div>
+
+<!-- ─── HERO ─── -->
 <div class="hero">
   <div class="hero-content">
     <div class="badge"><span class="badge-dot"></span> Platform Konoha Smart City</div>
@@ -297,10 +557,28 @@
       <a href="{% url 'about' %}" class="btn">Pelajari Lebih Lanjut →</a>
       <a href="{% url 'contacts' %}" class="btn btn-ghost">Hubungi Kami →</a>
     </div>
+    <div class="hero-auth mt-4" style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+      {% if user.is_authenticated %}
+        <span style="color:rgba(255,255,255,0.8); font-size:0.85rem;">Halo, <strong>{{ user.username }}</strong></span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline; margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-light">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-light">
+          <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
+        <a href="{% url 'register' %}" class="btn btn-outline-light">
+          <i class="bi bi-person-plus"></i> Register
+        </a>
+      {% endif %}
+    </div>
   </div>
 </div>
 
-<!-- SERVICES -->
+<!-- ─── SERVICES ─── -->
 <div class="services">
   <div class="service-card reveal">
     <div class="service-icon">
@@ -325,7 +603,7 @@
   </div>
 </div>
 
-<!-- STATS -->
+<!-- ─── STATS ─── -->
 <div class="stats">
   <div class="stat reveal">
     <div class="stat-num">{{ total_reports }}</div>
@@ -341,23 +619,65 @@
   </div>
 </div>
 
+<!-- ─── FOOTER ─── -->
 <footer>
-  <span>© 2025 <span class="foot-brand">SmartReport</span> — Sistem Pelaporan Kota Konoha</span>
+  <span>© 2026 <span class="foot-brand">SmartReport</span> — Sistem Pelaporan Kota Konoha</span>
   <span>Dibuat untuk warga Konoha</span>
 </footer>
 
+<!-- Bootstrap JS dulu sebelum script custom -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-  // Sticky nav shadow
+  // Nav scroll shadow
   const nav = document.getElementById('mainNav');
-  window.addEventListener('scroll', () => {
+  const mobileNavToggle = document.getElementById('mobileNavToggle');
+  const mobileNavMenu = document.getElementById('mobileNavMenu');
+  window.addEventListener('scroll', function() {
     nav.classList.toggle('scrolled', window.scrollY > 10);
   });
+  if (mobileNavToggle && mobileNavMenu) {
+    mobileNavToggle.addEventListener('click', function() {
+      const isOpen = mobileNavMenu.classList.toggle('open');
+      mobileNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 991) {
+        mobileNavMenu.classList.remove('open');
+        mobileNavToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 
   // Scroll reveal
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
   }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+
+  // Tutup toast manual (tombol X)
+  function closeToast(btn) {
+    var toast = btn.closest('.sr-toast');
+    toast.classList.add('hide');
+    setTimeout(function() {
+      toast.remove();
+    }, 300);
+  }
+
+  // Auto close setelah 4 detik
+  document.querySelectorAll('.sr-toast').forEach(function(toast, index) {
+    setTimeout(function() {
+      if (document.body.contains(toast)) {
+        toast.classList.add('hide');
+        setTimeout(function() {
+          if (document.body.contains(toast)) toast.remove();
+        }, 300);
+      }
+    }, 4000 + (index * 300));
+  });
 </script>
+
 </body>
 </html>

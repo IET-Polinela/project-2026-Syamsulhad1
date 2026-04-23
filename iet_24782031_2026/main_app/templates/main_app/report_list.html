@@ -1,135 +1,265 @@
 {% extends 'base.html' %}
 
-{% block title %}Daftar Laporan — SmartReport{% endblock %}
+{% block title %}Daftar Laporan â€” SmartReport{% endblock %}
+
+{% block extra_head %}
+<style>
+    .report-shell {
+        animation: fadeUp 0.7s ease 0.08s both;
+    }
+
+    .report-shell .report-panel {
+        border-color: #d4d4d4;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .report-shell .report-panel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(14, 165, 233, 0.12) !important;
+        border-color: #bfdbfe;
+    }
+
+    .report-shell .input-group,
+    .report-shell .form-select,
+    .report-shell .btn,
+    .report-shell .badge {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .report-shell .input-group:focus-within {
+        transform: translateY(-1px);
+    }
+
+    .report-shell .form-select:focus,
+    .report-shell .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.12);
+    }
+
+    .report-shell .btn-primary,
+    .report-shell .btn-warning,
+    .report-shell .btn-success {
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.18);
+    }
+
+    .report-shell .btn:hover,
+    .report-row:hover .badge {
+        transform: translateY(-1px);
+    }
+
+    .report-table thead tr {
+        animation: fadeUp 0.55s ease 0.12s both;
+    }
+
+    .report-row {
+        opacity: 0;
+        transform: translateY(26px);
+        transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.2s ease;
+    }
+
+    .report-row.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .report-row td {
+        transition: background-color 0.2s ease;
+    }
+
+    .report-table tbody tr.report-row:hover td {
+        background: rgba(14, 165, 233, 0.04);
+    }
+
+    .table-empty {
+        animation: fadeUp 0.7s ease 0.18s both;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .report-shell,
+        .report-shell .report-panel,
+        .report-shell .input-group,
+        .report-shell .form-select,
+        .report-shell .btn,
+        .report-shell .badge,
+        .report-table thead tr,
+        .report-row,
+        .table-empty {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+            opacity: 1 !important;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item active" aria-current="page">Daftar Laporan</li>
 {% endblock %}
 
 {% block content %}
-<div class="card border rounded-4 mb-4 shadow-sm" style="border-color: #d4d4d4;">
-    <div class="card-body p-3">
-        <form method="GET" action="{% url 'report_list' %}" class="row g-3">
-            <div class="col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 ps-3">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0 py-2" 
-                           placeholder="Cari laporan..." value="{{ request.GET.search|default:'' }}">
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <select name="category" class="form-select py-2" onchange="this.form.submit()">
-                    <option value="">Semua Kategori</option>
-                    <option value="INFRASTRUCTURE" {% if request.GET.category == 'INFRASTRUCTURE' %}selected{% endif %}>Infrastruktur</option>
-                    <option value="ENVIRONMENT" {% if request.GET.category == 'ENVIRONMENT' %}selected{% endif %}>Lingkungan</option>
-                    <option value="FACILITY" {% if request.GET.category == 'FACILITY' %}selected{% endif %}>Fasilitas Publik</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <a href="{% url 'report_create' %}" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
-                    <i class="bi bi-plus-lg me-2"></i>Buat Laporan
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="card border rounded-4 overflow-hidden shadow-sm" style="border-color: #d4d4d4;">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
-                <tr class="small text-muted fw-bold">
-                    <th class="ps-4 py-3" style="width: 40%;">JUDUL LAPORAN</th>
-                    <th style="width: 25%;">LOKASI</th>
-                    <th class="text-center" style="width: 15%;">STATUS</th>
-                    <th class="text-center pe-4" style="width: 20%;">AKSI</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for report in reports %}
-                <tr>
-                    <td class="ps-4 py-3">
-                        <div class="fw-bold text-dark mb-1">{{ report.title }}</div>
-                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.7rem;">
-                            <i class="bi bi-tag-fill me-1"></i>{{ report.get_category_display }}
+<div class="report-shell">
+    <div class="card report-panel border rounded-4 mb-4 shadow-sm">
+        <div class="card-body p-3">
+            <form method="GET" action="{% url 'report_list' %}" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 ps-3">
+                            <i class="bi bi-search text-muted"></i>
                         </span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center text-muted small">
-                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>
-                            {{ report.location }}
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        {% if report.status == 'REPORTED' %}
-                            <span class="badge rounded-pill bg-secondary px-3 py-2">
-                                <i class="bi bi-send-fill me-1"></i>Reported
+                        <input type="text" name="search" class="form-control border-start-0 ps-0 py-2"
+                               placeholder="Cari laporan..." value="{{ request.GET.search|default:'' }}">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <select name="category" class="form-select py-2" onchange="this.form.submit()">
+                        <option value="">Semua Kategori</option>
+                        <option value="INFRASTRUCTURE" {% if request.GET.category == 'INFRASTRUCTURE' %}selected{% endif %}>Infrastruktur</option>
+                        <option value="ENVIRONMENT" {% if request.GET.category == 'ENVIRONMENT' %}selected{% endif %}>Lingkungan</option>
+                        <option value="FACILITY" {% if request.GET.category == 'FACILITY' %}selected{% endif %}>Fasilitas Publik</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <a href="{% url 'report_create' %}" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
+                        <i class="bi bi-plus-lg me-2"></i>Buat Laporan
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card report-panel border rounded-4 overflow-hidden shadow-sm">
+        <div class="table-responsive">
+            <table class="table report-table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="small text-muted fw-bold">
+                        <th class="ps-4 py-3" style="width: 40%;">JUDUL LAPORAN</th>
+                        <th style="width: 25%;">LOKASI</th>
+                        <th class="text-center" style="width: 15%;">STATUS</th>
+                        <th class="text-center pe-4" style="width: 20%;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr class="report-row">
+                        <td class="ps-4 py-3">
+                            <div class="fw-bold text-dark mb-1">{{ report.title }}</div>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-tag-fill me-1"></i>{{ report.get_category_display }}
                             </span>
-                        {% elif report.status == 'VERIFIED' %}
-                            <span class="badge rounded-pill bg-primary px-3 py-2">
-                                <i class="bi bi-shield-check me-1"></i>Verified
-                            </span>
-                        {% elif report.status == 'IN_PROGRESS' %}
-                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
-                                <i class="bi bi-gear-wide-connected me-1"></i>In Progress
-                            </span>
-                        {% elif report.status == 'RESOLVED' %}
-                            <span class="badge rounded-pill bg-success px-3 py-2">
-                                <i class="bi bi-check-circle-fill me-1"></i>Resolved
-                            </span>
-                        {% endif %}
-                    </td>
-                    <td class="text-center pe-4">
-                        <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <!-- Tombol Workflow Status -->
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                {{ report.location }}
+                            </div>
+                        </td>
+                        <td class="text-center">
                             {% if report.status == 'REPORTED' %}
-                                <a href="{% url 'update_status' report.pk 'VERIFIED' %}" class="btn btn-sm btn-primary shadow-sm px-3">
-                                    <i class="bi bi-shield-check me-1"></i>Verifikasi
-                                </a>
+                                <span class="badge rounded-pill bg-secondary px-3 py-2">
+                                    <i class="bi bi-send-fill me-1"></i>Reported
+                                </span>
                             {% elif report.status == 'VERIFIED' %}
-                                <a href="{% url 'update_status' report.pk 'IN_PROGRESS' %}" class="btn btn-sm btn-warning shadow-sm px-3 text-dark">
-                                    <i class="bi bi-gear-wide-connected me-1"></i>Proses
-                                </a>
+                                <span class="badge rounded-pill bg-primary px-3 py-2">
+                                    <i class="bi bi-shield-check me-1"></i>Verified
+                                </span>
                             {% elif report.status == 'IN_PROGRESS' %}
-                                <a href="{% url 'update_status' report.pk 'RESOLVED' %}" class="btn btn-sm btn-success shadow-sm px-3">
-                                    <i class="bi bi-check-all me-1"></i>Selesaikan
-                                </a>
+                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                    <i class="bi bi-gear-wide-connected me-1"></i>In Progress
+                                </span>
+                            {% elif report.status == 'RESOLVED' %}
+                                <span class="badge rounded-pill bg-success px-3 py-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Resolved
+                                </span>
                             {% endif %}
-                            
-                            <!-- Tombol Detail -->
-                            <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm btn-outline-secondary" title="Lihat Detail">
-                                <i class="bi bi-eye-fill"></i>
-                            </a>
-                            
-                            <!-- Tombol Edit (Tidak tersedia untuk RESOLVED) -->
-                            {% if report.status != 'RESOLVED' %}
-                                <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info" title="Edit Data">
-                                    <i class="bi bi-pencil"></i>
+                        </td>
+                        <td class="text-center pe-4">
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                {% if report.status == 'REPORTED' %}
+                                    <a href="{% url 'update_status' report.pk 'VERIFIED' %}" class="btn btn-sm btn-primary shadow-sm px-3">
+                                        <i class="bi bi-shield-check me-1"></i>Verifikasi
+                                    </a>
+                                {% elif report.status == 'VERIFIED' %}
+                                    <a href="{% url 'update_status' report.pk 'IN_PROGRESS' %}" class="btn btn-sm btn-warning shadow-sm px-3 text-dark">
+                                        <i class="bi bi-gear-wide-connected me-1"></i>Proses
+                                    </a>
+                                {% elif report.status == 'IN_PROGRESS' %}
+                                    <a href="{% url 'update_status' report.pk 'RESOLVED' %}" class="btn btn-sm btn-success shadow-sm px-3">
+                                        <i class="bi bi-check-all me-1"></i>Selesaikan
+                                    </a>
+                                {% endif %}
+
+                                <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm btn-outline-secondary" title="Lihat Detail">
+                                    <i class="bi bi-eye-fill"></i>
                                 </a>
-                            {% endif %}
-                            
-                            <!-- Tombol Hapus -->
-                            <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger" title="Hapus Laporan">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center py-5">
-                        <i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>
-                        <p class="mt-3 text-muted">Tidak ada laporan yang ditemukan.</p>
-                        <a href="{% url 'report_list' %}" class="btn btn-sm btn-outline-secondary">Reset Pencarian</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+                                {% if report.status != 'RESOLVED' %}
+                                    <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info" title="Edit Data">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% endif %}
+
+                                <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger" title="Hapus Laporan">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 table-empty">
+                            <i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="mt-3 text-muted">Tidak ada laporan yang ditemukan.</p>
+                            <a href="{% url 'report_list' %}" class="btn btn-sm btn-outline-secondary">Reset Pencarian</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    (function() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.querySelectorAll('.report-row').forEach(function(row) {
+                row.classList.add('is-visible');
+            });
+            return;
+        }
+
+        var rows = document.querySelectorAll('.report-row');
+        if (!rows.length) return;
+
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        rows.forEach(function(row, index) {
+            row.style.transitionDelay = Math.min(index * 90, 420) + 'ms';
+            observer.observe(row);
+        });
+    })();
+</script>
 {% endblock %}

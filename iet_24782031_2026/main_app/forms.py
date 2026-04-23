@@ -4,12 +4,11 @@ from .models import Report
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ['title', 'category', 'description', 'location', 'status']
+        fields = ['title', 'category', 'description', 'location']
         
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Judul Laporan'}),
-            'category': forms.Select(), 
-            'description': forms.Textarea(attrs={'placeholder': 'Jelaskan detail masalah...', 'rows': 4}),
-            'location': forms.TextInput(attrs={'placeholder': 'Lokasi kejadian'}),
-            'status': forms.Select(), 
+            'title': forms.TextInput(attrs={'placeholder': 'Judul Laporan', 'required': True}),
+            'category': forms.Select(attrs={'required': True}), 
+            'description': forms.Textarea(attrs={'placeholder': 'Jelaskan detail masalah...', 'rows': 4, 'required': True}),
+            'location': forms.TextInput(attrs={'placeholder': 'Lokasi kejadian', 'required': True}),
         }
