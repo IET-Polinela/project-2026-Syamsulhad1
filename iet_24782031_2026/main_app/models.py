@@ -8,10 +8,11 @@ STATUS_CHOICES = [
 ]
 
 CATEGORY_CHOICES = [
-    ('INFRASTRUCTURE', 'Infrastruktur'),
+    ('INFRASTRUCTURE', 'Infrastruktur & Jalan'),
     ('SECURITY', 'Keamanan'),
     ('HEALTH', 'Kesehatan'),
-    ('ENVIRONMENT', 'Lingkungan'),
+    ('ENVIRONMENT', 'Lingkungan & Kebersihan'),
+    ('PUBLIC_FACILITY', 'Fasilitas Publik'),
 ]
 
 class Report(models.Model):

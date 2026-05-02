@@ -421,6 +421,7 @@
         <li><a href="{% url 'home' %}"        class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
         <li><a href="{% url 'about' %}"       class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
         <li><a href="{% url 'contacts' %}"    class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a></li>
+        <li><a href="{% url 'dashboard' %}"   class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
         <li><a href="{% url 'report_list' %}" class="{% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">Daftar Laporan</a></li>
     </ul>
     
@@ -451,6 +452,7 @@
         <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
         <a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
         <a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Contacts</a>
+        <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
         <a href="{% url 'report_list' %}" class="{% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">Daftar Laporan</a>
     </div>
     <div class="mobile-nav-divider"></div>

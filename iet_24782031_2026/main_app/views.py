@@ -1,12 +1,14 @@
 from django import forms
 from django.contrib import messages
+from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, TemplateView, UpdateView
 
 from .forms import ReportForm
-from .models import Report
+from .models import CATEGORY_CHOICES, Report
 
 
 def user_is_app_admin(user):
@@ -33,18 +35,69 @@ class HomeView(TemplateView):
         return context
 
 # 2. report_list
-def report_list(request):
+def get_filtered_reports(request):
     reports = Report.objects.all().order_by('-created_at')
 
     search_query = request.GET.get('search')
     if search_query:
-        reports = reports.filter(title__icontains=search_query) | reports.filter(location__icontains=search_query)
+        reports = reports.filter(
+            Q(title__icontains=search_query)
+            | Q(location__icontains=search_query)
+            | Q(description__icontains=search_query)
+        )
 
     category_filter = request.GET.get('category')
     if category_filter:
         reports = reports.filter(category=category_filter)
 
-    return render(request, 'main_app/report_list.html', {'reports': reports})
+    return reports
+
+
+def serialize_report(report):
+    return {
+        'id': report.id,
+        'title': report.title,
+        'category': report.category,
+        'category_label': report.get_category_display(),
+        'description': report.description,
+        'location': report.location,
+        'status': report.status,
+        'status_label': report.get_status_display(),
+        'created_at': report.created_at.strftime('%d %b %Y %H:%M'),
+        'detail_url': reverse('report_detail', kwargs={'pk': report.pk}),
+        'edit_url': reverse('report_update', kwargs={'pk': report.pk}),
+        'delete_url': reverse('report_delete', kwargs={'pk': report.pk}),
+        'verify_url': reverse('update_status', kwargs={'pk': report.pk, 'new_status': 'VERIFIED'}),
+        'process_url': reverse('update_status', kwargs={'pk': report.pk, 'new_status': 'IN_PROGRESS'}),
+        'resolve_url': reverse('update_status', kwargs={'pk': report.pk, 'new_status': 'RESOLVED'}),
+    }
+
+
+def report_list(request):
+    return render(
+        request,
+        'main_app/report_list.html',
+        {
+            'reports': get_filtered_reports(request),
+            'category_choices': CATEGORY_CHOICES,
+        },
+    )
+
+
+class ReportListJsonView(View):
+    def get(self, request, *args, **kwargs):
+        reports = get_filtered_reports(request)
+        return JsonResponse({
+            'reports': [serialize_report(report) for report in reports],
+            'total': reports.count(),
+            'is_admin': user_is_app_admin(request.user),
+        })
+
+
+class ReportDetailJsonView(View):
+    def get(self, request, pk, *args, **kwargs):
+        report = get_object_or_404(Report, pk=pk)
+        return JsonResponse({'report': serialize_report(report)})
 
 # 3. ReportDetailView
 class ReportDetailView(DetailView):

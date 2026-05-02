@@ -51,6 +51,26 @@
         animation: fadeUp 0.55s ease 0.12s both;
     }
 
+    .report-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .report-table-wrap {
+        overflow-x: visible;
+    }
+
+    .report-title-cell,
+    .report-location-cell {
+        min-width: 0;
+    }
+
+    .report-title-text,
+    .report-location-text {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
     .report-row {
         opacity: 0;
         transform: translateY(26px);
@@ -70,8 +90,66 @@
         background: rgba(14, 165, 233, 0.04);
     }
 
+    .report-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .report-workflow-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 112px;
+        height: 34px;
+        white-space: nowrap;
+    }
+
+    .report-icon-actions {
+        display: inline-grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 34px;
+        gap: 6px;
+    }
+
+    .report-icon-btn {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        flex: 0 0 34px;
+    }
+
     .table-empty {
         animation: fadeUp 0.7s ease 0.18s both;
+    }
+
+    .modal-detail-label {
+        color: #64748b;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .modal-detail-value {
+        color: #111827;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .modal-description {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        color: #334155;
+        line-height: 1.7;
+        padding: 16px;
     }
 
     @keyframes fadeUp {
@@ -101,6 +179,20 @@
             opacity: 1 !important;
         }
     }
+
+    @media (max-width: 767.98px) {
+        .report-actions {
+            display: inline-grid;
+            grid-template-columns: 1fr;
+            justify-items: stretch;
+        }
+
+        .report-workflow-btn,
+        .report-icon-actions {
+            width: 100%;
+            min-width: 0;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -112,23 +204,23 @@
 <div class="report-shell">
     <div class="card report-panel border rounded-4 mb-4 shadow-sm">
         <div class="card-body p-3">
-            <form method="GET" action="{% url 'report_list' %}" class="row g-3">
+            <form method="GET" action="{% url 'report_list' %}" class="row g-3" id="reportSearchForm">
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0 ps-3">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0 py-2"
+                        <input type="text" name="search" class="form-control border-start-0 ps-0 py-2" id="reportSearchInput"
                                placeholder="Cari laporan..." value="{{ request.GET.search|default:'' }}">
                     </div>
                 </div>
 
                 <div class="col-md-3">
-                    <select name="category" class="form-select py-2" onchange="this.form.submit()">
+                    <select name="category" class="form-select py-2" id="reportCategoryFilter">
                         <option value="">Semua Kategori</option>
-                        <option value="INFRASTRUCTURE" {% if request.GET.category == 'INFRASTRUCTURE' %}selected{% endif %}>Infrastruktur</option>
-                        <option value="ENVIRONMENT" {% if request.GET.category == 'ENVIRONMENT' %}selected{% endif %}>Lingkungan</option>
-                        <option value="FACILITY" {% if request.GET.category == 'FACILITY' %}selected{% endif %}>Fasilitas Publik</option>
+                        {% for value, label in category_choices %}
+                            <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -142,27 +234,27 @@
     </div>
 
     <div class="card report-panel border rounded-4 overflow-hidden shadow-sm">
-        <div class="table-responsive">
+        <div class="table-responsive report-table-wrap">
             <table class="table report-table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr class="small text-muted fw-bold">
                         <th class="ps-4 py-3" style="width: 40%;">JUDUL LAPORAN</th>
                         <th style="width: 25%;">LOKASI</th>
                         <th class="text-center" style="width: 15%;">STATUS</th>
-                        <th class="text-center pe-4" style="width: 20%;">AKSI</th>
+                        <th class="text-center pe-4" style="width: 24%;">AKSI</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="reportTableBody" data-is-admin="{% if user.is_authenticated and user.is_admin %}true{% else %}false{% endif %}">
                     {% for report in reports %}
                     <tr class="report-row">
-                        <td class="ps-4 py-3">
-                            <div class="fw-bold text-dark mb-1">{{ report.title }}</div>
+                        <td class="ps-4 py-3 report-title-cell">
+                            <div class="fw-bold text-dark mb-1 report-title-text">{{ report.title }}</div>
                             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.7rem;">
                                 <i class="bi bi-tag-fill me-1"></i>{{ report.get_category_display }}
                             </span>
                         </td>
-                        <td>
-                            <div class="d-flex align-items-center text-muted small">
+                        <td class="report-location-cell">
+                            <div class="d-flex align-items-center text-muted small report-location-text">
                                 <i class="bi bi-geo-alt-fill text-danger me-2"></i>
                                 {{ report.location }}
                             </div>
@@ -187,34 +279,40 @@
                             {% endif %}
                         </td>
                         <td class="text-center pe-4">
-                            <div class="d-flex justify-content-center gap-2 flex-wrap">
-                                {% if report.status == 'REPORTED' %}
-                                    <a href="{% url 'update_status' report.pk 'VERIFIED' %}" class="btn btn-sm btn-primary shadow-sm px-3">
-                                        <i class="bi bi-shield-check me-1"></i>Verifikasi
-                                    </a>
-                                {% elif report.status == 'VERIFIED' %}
-                                    <a href="{% url 'update_status' report.pk 'IN_PROGRESS' %}" class="btn btn-sm btn-warning shadow-sm px-3 text-dark">
-                                        <i class="bi bi-gear-wide-connected me-1"></i>Proses
-                                    </a>
-                                {% elif report.status == 'IN_PROGRESS' %}
-                                    <a href="{% url 'update_status' report.pk 'RESOLVED' %}" class="btn btn-sm btn-success shadow-sm px-3">
-                                        <i class="bi bi-check-all me-1"></i>Selesaikan
-                                    </a>
+                            <div class="report-actions">
+                                {% if user.is_authenticated and user.is_admin %}
+                                    {% if report.status == 'REPORTED' %}
+                                        <a href="{% url 'update_status' report.pk 'VERIFIED' %}" class="btn btn-sm btn-primary shadow-sm report-workflow-btn">
+                                            <i class="bi bi-shield-check me-1"></i>Verifikasi
+                                        </a>
+                                    {% elif report.status == 'VERIFIED' %}
+                                        <a href="{% url 'update_status' report.pk 'IN_PROGRESS' %}" class="btn btn-sm btn-warning shadow-sm text-dark report-workflow-btn">
+                                            <i class="bi bi-gear-wide-connected me-1"></i>Proses
+                                        </a>
+                                    {% elif report.status == 'IN_PROGRESS' %}
+                                        <a href="{% url 'update_status' report.pk 'RESOLVED' %}" class="btn btn-sm btn-success shadow-sm report-workflow-btn">
+                                            <i class="bi bi-check-all me-1"></i>Selesaikan
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
 
-                                <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm btn-outline-secondary" title="Lihat Detail">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
+                                <div class="report-icon-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary report-icon-btn js-report-detail" data-report-id="{{ report.pk }}" title="Lihat Detail">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
 
-                                {% if report.status != 'RESOLVED' %}
-                                    <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info" title="Edit Data">
-                                        <i class="bi bi-pencil"></i>
+                                    {% if user.is_authenticated and user.is_admin %}
+                                    {% if report.status != 'RESOLVED' %}
+                                        <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info report-icon-btn" title="Edit Data">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger report-icon-btn" title="Hapus Laporan">
+                                        <i class="bi bi-trash"></i>
                                     </a>
-                                {% endif %}
-
-                                <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger" title="Hapus Laporan">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -232,34 +330,286 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="reportDetailModal" tabindex="-1" aria-labelledby="reportDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-detail-label">Detail Laporan</div>
+                    <h5 class="modal-title fw-bold" id="reportDetailModalLabel">Memuat data...</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-2">
+                    <div class="col-md-6">
+                        <div class="modal-detail-label">Kategori</div>
+                        <div class="modal-detail-value" id="modalReportCategory">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-detail-label">Status</div>
+                        <div class="modal-detail-value" id="modalReportStatus">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-detail-label">Lokasi</div>
+                        <div class="modal-detail-value" id="modalReportLocation">-</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-detail-label">Tanggal Laporan</div>
+                        <div class="modal-detail-value" id="modalReportDate">-</div>
+                    </div>
+                </div>
+                <div class="modal-detail-label mb-2">Deskripsi</div>
+                <div class="modal-description" id="modalReportDescription">Memuat data...</div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-outline-secondary" id="modalReportFullLink">Buka Detail Status</a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_script %}
 <script>
     (function() {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            document.querySelectorAll('.report-row').forEach(function(row) {
-                row.classList.add('is-visible');
-            });
-            return;
+        var form = document.getElementById('reportSearchForm');
+        var searchInput = document.getElementById('reportSearchInput');
+        var categoryFilter = document.getElementById('reportCategoryFilter');
+        var tableBody = document.getElementById('reportTableBody');
+        var detailModalElement = document.getElementById('reportDetailModal');
+        var detailModal = detailModalElement ? new bootstrap.Modal(detailModalElement) : null;
+        var liveSearchTimer = null;
+        var listAbortController = null;
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        var rows = document.querySelectorAll('.report-row');
-        if (!rows.length) return;
+        function statusBadge(report) {
+            var badgeMap = {
+                REPORTED: ['bg-secondary', 'bi-send-fill'],
+                VERIFIED: ['bg-primary', 'bi-shield-check'],
+                IN_PROGRESS: ['bg-warning text-dark', 'bi-gear-wide-connected'],
+                RESOLVED: ['bg-success', 'bi-check-circle-fill']
+            };
+            var config = badgeMap[report.status] || ['bg-secondary', 'bi-info-circle'];
 
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
+            return [
+                '<span class="badge rounded-pill ' + config[0] + ' px-3 py-2">',
+                '<i class="bi ' + config[1] + ' me-1"></i>',
+                escapeHtml(report.status_label),
+                '</span>'
+            ].join('');
+        }
+
+        function transitionButton(report) {
+            if (report.status === 'REPORTED') {
+                return '<a href="' + escapeHtml(report.verify_url) + '" class="btn btn-sm btn-primary shadow-sm report-workflow-btn"><i class="bi bi-shield-check me-1"></i>Verifikasi</a>';
+            }
+            if (report.status === 'VERIFIED') {
+                return '<a href="' + escapeHtml(report.process_url) + '" class="btn btn-sm btn-warning shadow-sm text-dark report-workflow-btn"><i class="bi bi-gear-wide-connected me-1"></i>Proses</a>';
+            }
+            if (report.status === 'IN_PROGRESS') {
+                return '<a href="' + escapeHtml(report.resolve_url) + '" class="btn btn-sm btn-success shadow-sm report-workflow-btn"><i class="bi bi-check-all me-1"></i>Selesaikan</a>';
+            }
+            return '';
+        }
+
+        function actionButtons(report, isAdmin) {
+            var iconButtons = [
+                '<button type="button" class="btn btn-sm btn-outline-secondary report-icon-btn js-report-detail" data-report-id="' + report.id + '" title="Lihat Detail">',
+                '<i class="bi bi-eye-fill"></i>',
+                '</button>'
+            ];
+            var workflowButton = '';
+
+            if (isAdmin) {
+                workflowButton = transitionButton(report);
+
+                if (report.status !== 'RESOLVED') {
+                    iconButtons.push('<a href="' + escapeHtml(report.edit_url) + '" class="btn btn-sm btn-outline-info report-icon-btn" title="Edit Data"><i class="bi bi-pencil"></i></a>');
+                }
+                iconButtons.push('<a href="' + escapeHtml(report.delete_url) + '" class="btn btn-sm btn-outline-danger report-icon-btn" title="Hapus Laporan"><i class="bi bi-trash"></i></a>');
+            }
+
+            return '<div class="report-actions">' + workflowButton + '<div class="report-icon-actions">' + iconButtons.join('') + '</div></div>';
+        }
+
+        function reportRow(report, isAdmin) {
+            return [
+                '<tr class="report-row is-visible">',
+                '<td class="ps-4 py-3 report-title-cell">',
+                '<div class="fw-bold text-dark mb-1 report-title-text">' + escapeHtml(report.title) + '</div>',
+                '<span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1" style="font-size: 0.7rem;">',
+                '<i class="bi bi-tag-fill me-1"></i>' + escapeHtml(report.category_label),
+                '</span>',
+                '</td>',
+                '<td class="report-location-cell">',
+                '<div class="d-flex align-items-center text-muted small report-location-text">',
+                '<i class="bi bi-geo-alt-fill text-danger me-2"></i>',
+                escapeHtml(report.location),
+                '</div>',
+                '</td>',
+                '<td class="text-center">' + statusBadge(report) + '</td>',
+                '<td class="text-center pe-4">' + actionButtons(report, isAdmin) + '</td>',
+                '</tr>'
+            ].join('');
+        }
+
+        function renderRows(reports, isAdmin) {
+            if (!reports.length) {
+                tableBody.innerHTML = [
+                    '<tr>',
+                    '<td colspan="4" class="text-center py-5 table-empty">',
+                    '<i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>',
+                    '<p class="mt-3 text-muted">Tidak ada laporan yang ditemukan.</p>',
+                    '</td>',
+                    '</tr>'
+                ].join('');
+                return;
+            }
+
+            tableBody.innerHTML = reports.map(function(report) {
+                return reportRow(report, isAdmin);
+            }).join('');
+        }
+
+        function buildListUrl() {
+            var params = new URLSearchParams(new FormData(form));
+            return "{% url 'report_list_json' %}?" + params.toString();
+        }
+
+        function fetchReports() {
+            if (listAbortController) {
+                listAbortController.abort();
+            }
+
+            listAbortController = new AbortController();
+
+            fetch(buildListUrl(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: listAbortController.signal
+            })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    renderRows(data.reports, data.is_admin);
+                    var params = new URLSearchParams(new FormData(form));
+                    window.history.replaceState({}, '', "{% url 'report_list' %}?" + params.toString());
+                })
+                .catch(function(error) {
+                    if (error.name !== 'AbortError') {
+                        tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-danger">Gagal memuat data laporan.</td></tr>';
+                    }
+                });
+        }
+
+        function debounceLiveSearch() {
+            clearTimeout(liveSearchTimer);
+            liveSearchTimer = setTimeout(fetchReports, 280);
+        }
+
+        function setModalLoading() {
+            document.getElementById('reportDetailModalLabel').textContent = 'Memuat data...';
+            document.getElementById('modalReportCategory').textContent = '-';
+            document.getElementById('modalReportStatus').textContent = '-';
+            document.getElementById('modalReportLocation').textContent = '-';
+            document.getElementById('modalReportDate').textContent = '-';
+            document.getElementById('modalReportDescription').textContent = 'Memuat data...';
+            document.getElementById('modalReportFullLink').setAttribute('href', '#');
+        }
+
+        function fillModal(report) {
+            document.getElementById('reportDetailModalLabel').textContent = report.title;
+            document.getElementById('modalReportCategory').textContent = report.category_label;
+            document.getElementById('modalReportStatus').textContent = report.status_label;
+            document.getElementById('modalReportLocation').textContent = report.location;
+            document.getElementById('modalReportDate').textContent = report.created_at;
+            document.getElementById('modalReportDescription').textContent = report.description;
+            document.getElementById('modalReportFullLink').setAttribute('href', report.detail_url);
+        }
+
+        function showReportDetail(reportId) {
+            if (!detailModal) return;
+
+            setModalLoading();
+            detailModal.show();
+
+            fetch('/reports/' + reportId + '/data/', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    fillModal(data.report);
+                })
+                .catch(function() {
+                    document.getElementById('reportDetailModalLabel').textContent = 'Gagal memuat detail';
+                    document.getElementById('modalReportDescription').textContent = 'Silakan coba lagi beberapa saat.';
+                });
+        }
+
+        function revealRows() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelectorAll('.report-row').forEach(function(row) {
+                    row.classList.add('is-visible');
+                });
+                return;
+            }
+
+            var rows = document.querySelectorAll('.report-row');
+            if (!rows.length) return;
+
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            rows.forEach(function(row, index) {
+                row.style.transitionDelay = Math.min(index * 90, 420) + 'ms';
+                observer.observe(row);
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                fetchReports();
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', debounceLiveSearch);
+        }
+
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', fetchReports);
+        }
+
+        if (tableBody) {
+            tableBody.addEventListener('click', function(event) {
+                var detailButton = event.target.closest('.js-report-detail');
+                if (detailButton) {
+                    showReportDetail(detailButton.dataset.reportId);
                 }
             });
-        }, { threshold: 0.12 });
+        }
 
-        rows.forEach(function(row, index) {
-            row.style.transitionDelay = Math.min(index * 90, 420) + 'ms';
-            observer.observe(row);
-        });
+        revealRows();
     })();
 </script>
 {% endblock %}

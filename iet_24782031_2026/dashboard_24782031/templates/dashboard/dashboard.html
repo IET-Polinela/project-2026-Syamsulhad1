@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Statistik - SmartReport{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-shell {
+        animation: fadeUp 0.65s ease 0.08s both;
+    }
+
+    .dashboard-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .dashboard-kicker {
+        color: #0369a1;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .dashboard-title {
+        color: #111827;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .dashboard-subtitle {
+        color: #64748b;
+        max-width: 660px;
+        margin: 10px 0 0;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .summary-card,
+    .chart-panel,
+    .report-table-panel {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .summary-card {
+        padding: 20px;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        font-size: 1.25rem;
+    }
+
+    .summary-icon.total { background: #e0f2fe; color: #0369a1; }
+    .summary-icon.progress { background: #fef3c7; color: #92400e; }
+    .summary-icon.done { background: #dcfce7; color: #166534; }
+
+    .summary-label {
+        color: #64748b;
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .summary-value {
+        color: #111827;
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .chart-panel,
+    .report-table-panel {
+        padding: 20px;
+    }
+
+    .chart-title,
+    .table-title {
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 14px;
+    }
+
+    .chart-box {
+        position: relative;
+        min-height: 320px;
+    }
+
+    .table-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .dashboard-table {
+        margin-bottom: 0;
+    }
+
+    .dashboard-table th {
+        color: #64748b;
+        font-size: 0.74rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-table td {
+        vertical-align: middle;
+    }
+
+    .report-title-cell {
+        max-width: 260px;
+    }
+
+    .report-title-text {
+        color: #111827;
+        display: block;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .report-meta {
+        color: #64748b;
+        display: block;
+        font-size: 0.78rem;
+        margin-top: 3px;
+    }
+
+    .empty-row {
+        color: #64748b;
+        text-align: center;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.74rem;
+        font-weight: 800;
+        line-height: 1;
+        padding: 7px 10px;
+        white-space: nowrap;
+    }
+
+    .status-reported { background: #f1f5f9; color: #475569; }
+    .status-verified { background: #dbeafe; color: #1d4ed8; }
+    .status-progress { background: #fef3c7; color: #92400e; }
+    .status-resolved { background: #dcfce7; color: #166534; }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 991px) {
+        .dashboard-header,
+        .chart-grid,
+        .table-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+    <div class="dashboard-header">
+        <div>
+            <div class="dashboard-kicker">Statistik Kota</div>
+            <h1 class="dashboard-title">Dashboard Laporan</h1>
+            <p class="dashboard-subtitle">
+                Ringkasan visual status dan kategori laporan warga SmartReport.
+            </p>
+        </div>
+        <a href="{% url 'report_list' %}" class="btn btn-primary rounded-3 px-4 py-2 fw-bold">
+            <i class="bi bi-list-check me-2"></i>Daftar Laporan
+        </a>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-icon total"><i class="bi bi-clipboard-data"></i></div>
+            <div class="summary-label">Total Laporan</div>
+            <div class="summary-value" id="totalReports">{{ total_reports }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon progress"><i class="bi bi-gear-wide-connected"></i></div>
+            <div class="summary-label">Sedang Diproses</div>
+            <div class="summary-value" id="inProgressReports">{{ in_progress_reports }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon done"><i class="bi bi-check-circle"></i></div>
+            <div class="summary-label">Selesai</div>
+            <div class="summary-value" id="resolvedReports">{{ resolved_reports }}</div>
+        </div>
+    </div>
+
+    <div class="chart-grid">
+        <div class="chart-panel">
+            <div class="chart-title">Distribusi Status</div>
+            <div class="chart-box">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-panel">
+            <div class="chart-title">Distribusi Kategori</div>
+            <div class="chart-box">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-grid">
+        <div class="report-table-panel">
+            <div class="table-title">5 Laporan Terbaru Dilaporkan</div>
+            <div class="table-responsive">
+                <table class="table dashboard-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Laporan</th>
+                            <th>Kategori</th>
+                            <th>Status</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="latestReportedRows">
+                        <tr>
+                            <td colspan="4" class="empty-row py-4">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="report-table-panel">
+            <div class="table-title">5 Laporan Terakhir Selesai</div>
+            <div class="table-responsive">
+                <table class="table dashboard-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Laporan</th>
+                            <th>Kategori</th>
+                            <th>Status</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="latestResolvedRows">
+                        <tr>
+                            <td colspan="4" class="empty-row py-4">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function() {
+        var chartColors = ['#0ea5e9', '#6366f1', '#f59e0b', '#22c55e', '#ef4444'];
+
+        function makeChart(canvasId, labels, values, type, label) {
+            var ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: values,
+                        backgroundColor: chartColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var value = typeof context.parsed === 'object'
+                                        ? context.parsed.y
+                                        : context.parsed;
+                                    return context.dataset.label + ': ' + value + (label === 'Persentase' ? '%' : '');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderReportRows(targetId, reports) {
+            var target = document.getElementById(targetId);
+            if (!target) return;
+
+            if (!reports.length) {
+                target.innerHTML = '<tr><td colspan="4" class="empty-row py-4">Belum ada data.</td></tr>';
+                return;
+            }
+
+            target.innerHTML = reports.map(function(report) {
+                var statusClassMap = {
+                    REPORTED: 'status-reported',
+                    VERIFIED: 'status-verified',
+                    IN_PROGRESS: 'status-progress',
+                    RESOLVED: 'status-resolved'
+                };
+                var statusClass = statusClassMap[report.status_code] || 'status-reported';
+
+                return [
+                    '<tr>',
+                    '<td class="report-title-cell">',
+                    '<span class="report-title-text">' + escapeHtml(report.title) + '</span>',
+                    '<span class="report-meta">' + escapeHtml(report.created_at) + ' - ' + escapeHtml(report.location) + '</span>',
+                    '</td>',
+                    '<td><span class="badge bg-info-subtle text-info border border-info-subtle">' + escapeHtml(report.category) + '</span></td>',
+                    '<td><span class="status-badge ' + statusClass + '">' + escapeHtml(report.status) + '</span></td>',
+                    '<td class="text-end">',
+                    '<a href="' + escapeHtml(report.detail_url) + '" class="btn btn-sm btn-outline-secondary" title="Lihat Detail">',
+                    '<i class="bi bi-eye-fill"></i>',
+                    '</a>',
+                    '</td>',
+                    '</tr>'
+                ].join('');
+            }).join('');
+        }
+
+        fetch("{% url 'dashboard_stats' %}")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                console.log("Data JSON berhasil diterima dari Fetch API:", data);
+
+                document.getElementById('totalReports').textContent = data.total_reports;
+                document.getElementById('inProgressReports').textContent = data.in_progress_reports;
+                document.getElementById('resolvedReports').textContent = data.resolved_reports;
+
+                makeChart(
+                    'statusChart',
+                    data.status.map(function(item) { return item.label + ' (' + item.percentage + '%)'; }),
+                    data.status.map(function(item) { return item.percentage; }),
+                    'doughnut',
+                    'Persentase'
+                );
+
+                makeChart(
+                    'categoryChart',
+                    data.category.map(function(item) { return item.label; }),
+                    data.category.map(function(item) { return item.total; }),
+                    'bar',
+                    'Jumlah'
+                );
+
+                renderReportRows('latestReportedRows', data.latest_reported);
+                renderReportRows('latestResolvedRows', data.latest_resolved);
+            });
+    })();
+</script>
+{% endblock %}

@@ -355,10 +355,13 @@
       animation: fadeUp 0.8s ease 0.1s both;
     }
     .service-card {
+      display: block;
+      color: inherit;
+      text-decoration: none;
       background: var(--white); padding: 32px 28px;
       border-right: 1px solid var(--gray-200);
       transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
-      cursor: default;
+      cursor: pointer;
     }
     .service-card:last-child { border-right: none; }
     .service-card:hover { background: var(--gray-50); transform: translateY(-3px); box-shadow: var(--shadow-md); z-index: 1; }
@@ -524,6 +527,7 @@
     <li><a href="{% url 'home' %}" class="active">Home</a></li>
     <li><a href="{% url 'about' %}">About</a></li>
     <li><a href="{% url 'contacts' %}">Contacts</a></li>
+    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
     <li><a href="{% url 'report_list' %}">Daftar Laporan</a></li>
   </ul>
   <div class="nav-right">
@@ -539,6 +543,7 @@
     <a href="{% url 'home' %}" class="active">Home</a>
     <a href="{% url 'about' %}">About</a>
     <a href="{% url 'contacts' %}">Contacts</a>
+    <a href="{% url 'dashboard' %}">Dashboard</a>
     <a href="{% url 'report_list' %}">Daftar Laporan</a>
   </div>
   <div class="mobile-nav-divider"></div>
@@ -580,37 +585,37 @@
 
 <!-- ─── SERVICES ─── -->
 <div class="services">
-  <div class="service-card reveal">
+  <a href="{% url 'report_list' %}?category=INFRASTRUCTURE" class="service-card reveal" aria-label="Lihat laporan Infrastruktur dan Jalan">
     <div class="service-icon">
       <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h3>Infrastruktur & Jalan</h3>
     <p>Laporkan kerusakan jalan, jembatan, atau fasilitas infrastruktur kota yang perlu perbaikan segera.</p>
-  </div>
-  <div class="service-card reveal" style="transition-delay:0.1s">
+  </a>
+  <a href="{% url 'report_list' %}?category=ENVIRONMENT" class="service-card reveal" style="transition-delay:0.1s" aria-label="Lihat laporan Lingkungan dan Kebersihan">
     <div class="service-icon">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
     </div>
     <h3>Lingkungan & Kebersihan</h3>
     <p>Adukan masalah sampah, polusi, atau kondisi lingkungan yang mengganggu kenyamanan warga kota.</p>
-  </div>
-  <div class="service-card reveal" style="transition-delay:0.2s">
+  </a>
+  <a href="{% url 'report_list' %}?category=PUBLIC_FACILITY" class="service-card reveal" style="transition-delay:0.2s" aria-label="Lihat laporan Fasilitas Publik">
     <div class="service-icon">
       <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
     </div>
     <h3>Fasilitas Publik</h3>
     <p>Laporkan kondisi taman, lampu jalan, halte, dan fasilitas umum yang membutuhkan perhatian.</p>
-  </div>
+  </a>
 </div>
 
 <!-- ─── STATS ─── -->
 <div class="stats">
   <div class="stat reveal">
-    <div class="stat-num">{{ total_reports }}</div>
+    <div class="stat-num" id="homeTotalReports">{{ total_reports }}</div>
     <div class="stat-label">Total Laporan</div>
   </div>
   <div class="stat reveal" style="transition-delay:0.1s">
-    <div class="stat-num">24</div>
+    <div class="stat-num" id="homeResolvedReports">0</div>
     <div class="stat-label">Laporan Tertangani</div>
   </div>
   <div class="stat reveal" style="transition-delay:0.2s">
@@ -677,6 +682,20 @@
       }
     }, 4000 + (index * 300));
   });
+
+  fetch("{% url 'dashboard_stats' %}")
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      console.log("Data JSON berhasil diterima dari Fetch API:", data);
+
+      document.getElementById('homeTotalReports').textContent = data.total_reports;
+      document.getElementById('homeResolvedReports').textContent = data.resolved_reports;
+    })
+    .catch(function(error) {
+      console.error("Gagal mengambil data JSON dari Fetch API:", error);
+    });
 </script>
 
 </body>
