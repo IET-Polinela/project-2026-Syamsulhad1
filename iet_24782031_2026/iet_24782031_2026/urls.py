@@ -9,4 +9,5 @@ urlpatterns = [
     path('dashboard/', include('dashboard_24782031.urls')), # Dashboard Statistik
     # path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('usermanagement_24782031.urls')),
+    path('api/', include('main_app.api_urls')), # API Endpoint untuk Laporan
 ]

@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'contacts',
     'usermanagement_24782031',
     'dashboard_24782031',
+    'rest_framework',
 ]
 
 AUTH_USER_MODEL = 'usermanagement_24782031.CustomUser'
@@ -80,6 +81,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

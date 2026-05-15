@@ -28,8 +28,22 @@ class StyledAuthenticationForm(AuthenticationForm):
 class RegisterForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'password1', 'password2']
         widgets = {
+            'first_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Masukkan nama depan',
+                    'autocomplete': 'given-name',
+                }
+            ),
+            'last_name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Masukkan nama belakang',
+                    'autocomplete': 'family-name',
+                }
+            ),
             'username': forms.TextInput(
                 attrs={
                     'class': 'form-control',

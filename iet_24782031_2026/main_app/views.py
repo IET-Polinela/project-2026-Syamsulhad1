@@ -37,6 +37,12 @@ class HomeView(TemplateView):
 # 2. report_list
 def get_filtered_reports(request):
     reports = Report.objects.all().order_by('-created_at')
+    if user_is_app_admin(request.user):
+        reports = reports.exclude(status='DRAFT')
+    elif request.user.is_authenticated:
+        reports = reports.filter(Q(reporter=request.user) | ~Q(status='DRAFT'))
+    else:
+        reports = reports.exclude(status='DRAFT')
 
     search_query = request.GET.get('search')
     if search_query:
@@ -61,6 +67,7 @@ def serialize_report(report):
         'category_label': report.get_category_display(),
         'description': report.description,
         'location': report.location,
+        'is_anonymous': report.is_anonymous,
         'status': report.status,
         'status_label': report.get_status_display(),
         'created_at': report.created_at.strftime('%d %b %Y %H:%M'),
@@ -112,6 +119,8 @@ class ReportCreateView(AdminRequiredMixin, CreateView):
     success_url = reverse_lazy('report_list')
 
     def form_valid(self, form):
+        form.instance.reporter = self.request.user
+        form.instance.status = 'REPORTED'
         messages.success(self.request, "Laporan berhasil dibuat!")
         return super().form_valid(form)
 
@@ -168,7 +177,13 @@ class ReportUpdateStatusView(AdminRequiredMixin, View):
     def post(self, request, pk):
         report = get_object_or_404(Report, pk=pk)
         new_status = request.POST.get('status')
-        if new_status:
+        valid_transitions = {
+            'REPORTED': ['VERIFIED'],
+            'VERIFIED': ['IN_PROGRESS'],
+            'IN_PROGRESS': ['RESOLVED'],
+            'RESOLVED': []
+        }
+        if new_status in valid_transitions.get(report.status, []):
             report.status = new_status
             report.save()
             messages.success(request, "Status berhasil diperbarui!")
