@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'dashboard_24782031',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -48,7 +49,12 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'usermanagement_24782031.CustomUser'
 
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True
+
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'SmartCity_db',
         'USER': 'postgres',
-        'PASSWORD': '24782031',
+        'PASSWORD': 'Admin12@',
         'HOST': 'localhost',
         'PORT': '5432',
     }
