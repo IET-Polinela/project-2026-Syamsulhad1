@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from .models import Report
@@ -13,12 +14,17 @@ def user_is_app_admin(user):
     return user.is_authenticated and getattr(user, 'is_admin', False)
 
 
-class ReportViewSet(viewsets.ModelViewSet):
+class ReportPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
 
+
+class ReportViewSet(viewsets.ModelViewSet):
     serializer_class = ReportSerializer
+    pagination_class = ReportPagination
 
     def get_permissions(self):
-
         if self.action in [
             'list',
             'retrieve',
@@ -33,27 +39,37 @@ class ReportViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-
-        reports = Report.objects.select_related(
-            'reporter'
-        ).order_by('-created_at')
-
         user = self.request.user
+        tab = self.request.query_params.get('tab', None)
 
-        # Admin hanya melihat laporan non-draft
+        queryset = Report.objects.select_related(
+            'reporter'
+        ).order_by('-updated_at')
+
+        # Admin hanya melihat semua laporan non-draft
         if user_is_app_admin(user):
-            return reports.exclude(status='DRAFT')
+            return queryset.exclude(status='DRAFT')
 
-        # Citizen:
-        # - melihat semua non-draft
-        # - melihat draft miliknya sendiri
-        return reports.filter(
+        # Tab Laporan Saya
+        # Menampilkan semua laporan milik user login
+        if tab == 'my_reports':
+            return queryset.filter(reporter=user)
+
+        # Tab Feed Kota
+        # Menampilkan laporan warga lain yang bukan DRAFT
+        if tab == 'feed':
+            return queryset.filter(
+                ~Q(reporter=user),
+                ~Q(status='DRAFT')
+            )
+
+        # Default:
+        # Menampilkan laporan non-draft + draft milik user
+        return queryset.filter(
             Q(reporter=user) | ~Q(status='DRAFT')
         )
 
     def perform_create(self, serializer):
-
-        # Admin tidak boleh membuat laporan
         if user_is_app_admin(self.request.user):
             raise PermissionDenied(
                 "Admin tidak dapat membuat laporan."
@@ -65,14 +81,11 @@ class ReportViewSet(viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
-
         report = serializer.instance
         user = self.request.user
 
-        # ADMIN:
-        # hanya boleh mengubah status
+        # Admin hanya boleh mengubah status laporan non-draft
         if user_is_app_admin(user):
-
             allowed_status = [
                 'REPORTED',
                 'VERIFIED',
@@ -81,6 +94,11 @@ class ReportViewSet(viewsets.ModelViewSet):
             ]
 
             new_status = self.request.data.get('status')
+
+            if report.status == 'DRAFT':
+                raise PermissionDenied(
+                    "Admin tidak dapat mengubah laporan yang masih DRAFT."
+                )
 
             if new_status not in allowed_status:
                 raise ValidationError(
@@ -93,13 +111,13 @@ class ReportViewSet(viewsets.ModelViewSet):
                 category=report.category,
                 description=report.description,
                 location=report.location,
+                is_anonymous=report.is_anonymous,
                 status=new_status
             )
 
             return
 
-        # CITIZEN:
-        # hanya boleh edit draft miliknya sendiri
+        # Citizen hanya boleh edit draft miliknya sendiri
         if (
             report.reporter != user
             or report.status != 'DRAFT'
@@ -114,16 +132,15 @@ class ReportViewSet(viewsets.ModelViewSet):
         )
 
     def perform_destroy(self, instance):
-
         user = self.request.user
 
-        # Admin tidak boleh delete laporan
+        # Admin tidak boleh menghapus laporan
         if user_is_app_admin(user):
             raise PermissionDenied(
                 "Admin tidak dapat menghapus laporan."
             )
 
-        # Citizen hanya boleh delete draft sendiri
+        # Citizen hanya boleh hapus draft sendiri
         if (
             instance.reporter != user
             or instance.status != 'DRAFT'
@@ -136,16 +153,13 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], url_path='submit')
     def submit(self, request, pk=None):
-
         report = self.get_object()
 
-        # Hanya pemilik draft
         if report.reporter != request.user:
             raise PermissionDenied(
                 "Anda bukan pemilik laporan ini."
             )
 
-        # Hanya draft yang bisa disubmit
         if report.status != 'DRAFT':
             raise ValidationError(
                 "Hanya laporan draft yang dapat dikirim."
