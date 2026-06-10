@@ -259,6 +259,7 @@ function renderReportCard(report, tab) {
     const statusLabel = statusLabels[report.status] || report.status;
     const categoryLabel = categoryLabels[report.category] || report.category;
     const canEdit = tab === "my_reports" && report.is_owner && report.status === "DRAFT";
+    const canDelete = tab === "my_reports" && report.is_owner && report.status === "DRAFT";
     const statusClass = getStatusClass(report.status);
 
     return `
@@ -293,10 +294,19 @@ function renderReportCard(report, tab) {
 
             <div class="d-flex align-items-center justify-content-between mt-3">
                 <span class="report-meta">Progress: ${progress}%</span>
-                ${canEdit ? `
-                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="editDraft(${report.id})">
-                        <i class="bi bi-pencil-square me-1"></i>Edit
-                    </button>
+                ${(canEdit || canDelete) ? `
+                    <div class="d-flex align-items-center gap-2">
+                        ${canEdit ? `
+                            <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="editDraft(${report.id})">
+                                <i class="bi bi-pencil-square me-1"></i>Edit
+                            </button>
+                        ` : ""}
+                        ${canDelete ? `
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-semibold" onclick="deleteDraft(${report.id})">
+                                <i class="bi bi-trash me-1"></i>Hapus
+                            </button>
+                        ` : ""}
+                    </div>
                 ` : ""}
             </div>
         </article>
@@ -707,6 +717,33 @@ async function editDraft(id) {
         }
 
         openReportModal(report);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function deleteDraft(id) {
+    const confirmed = confirm("Hapus draft laporan ini?");
+
+    if (!confirmed) return;
+
+    try {
+        const response = await requestAPI(`/api/reports/${id}/`, "DELETE");
+
+        if (!response.ok) {
+            let message = "Draft tidak dapat dihapus.";
+
+            try {
+                const data = await response.json();
+                message = data.detail || message;
+            } catch (error) {
+                // Response DELETE yang gagal tidak selalu punya body JSON.
+            }
+
+            throw new Error(message);
+        }
+
+        await loadDashboardData(currentDashboardTab, currentDashboardPage);
     } catch (error) {
         alert(error.message);
     }

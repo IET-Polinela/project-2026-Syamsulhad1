@@ -25,17 +25,14 @@ function updateNavigation(currentHash) {
         navUserLabel.textContent = "Citizen Portal";
     }
 
-    navMenu.innerHTML = currentHash === "#login"
-        ? `
-            <a href="#login" class="nav-auth-btn nav-auth-primary">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Login
-            </a>
-        `
-        : `
-            <a href="#login" class="nav-auth-btn nav-auth-primary">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Login
-            </a>
-        `;
+    navMenu.innerHTML = `
+        <a href="#login" class="nav-auth-btn ${currentHash === "#login" ? "nav-auth-primary" : "nav-auth-outline"}">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+        </a>
+        <a href="#register" class="nav-auth-btn ${currentHash === "#register" ? "nav-auth-primary" : "nav-auth-outline"}">
+            <i class="bi bi-person-plus me-1"></i>Register
+        </a>
+    `;
 }
 
 function loginView() {
@@ -70,6 +67,61 @@ function loginView() {
                     <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Login
                     </button>
+
+                    <a href="#register" class="btn btn-outline-primary w-100 fw-bold py-2 mt-3">
+                        <i class="bi bi-person-plus me-2"></i>Register
+                    </a>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+function registerView() {
+    return `
+        <div class="login-shell">
+            <div class="portal-card login-card">
+                <div class="mb-4">
+                    <div class="login-kicker">Citizen Portal</div>
+                    <h1 class="h4 fw-bold mb-2">Register SmartReport</h1>
+                    <p class="text-secondary mb-0">Buat akun warga untuk mulai mengirim dan memantau laporan kota.</p>
+                </div>
+
+                <form id="registerForm">
+                    <label class="form-label fw-semibold" for="registerUsername">Username</label>
+                    <input
+                        type="text"
+                        id="registerUsername"
+                        class="form-control mb-3"
+                        placeholder="Pilih username"
+                        autocomplete="username"
+                        required>
+
+                    <label class="form-label fw-semibold" for="registerPassword">Password</label>
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        class="form-control mb-3"
+                        placeholder="Buat password"
+                        autocomplete="new-password"
+                        required>
+
+                    <label class="form-label fw-semibold" for="registerPasswordConfirm">Konfirmasi Password</label>
+                    <input
+                        type="password"
+                        id="registerPasswordConfirm"
+                        class="form-control mb-4"
+                        placeholder="Ulangi password"
+                        autocomplete="new-password"
+                        required>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
+                        <i class="bi bi-person-plus me-2"></i>Register
+                    </button>
+
+                    <p class="text-secondary text-center small mt-3 mb-0">
+                        Sudah punya akun? <a href="#login" class="fw-semibold">Login</a>
+                    </p>
                 </form>
             </div>
         </div>
@@ -197,6 +249,7 @@ function dashboardView() {
 
 const routes = {
     "#login": loginView,
+    "#register": registerView,
     "#dashboard": dashboardView
 };
 
@@ -238,6 +291,10 @@ function handleRouting() {
 
     if (targetHash === "#login" && typeof setupLoginForm === "function") {
         setupLoginForm();
+    }
+
+    if (targetHash === "#register" && typeof setupRegisterForm === "function") {
+        setupRegisterForm();
     }
 
     if (targetHash === "#dashboard") {
