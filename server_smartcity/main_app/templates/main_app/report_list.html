@@ -225,9 +225,19 @@
                 </div>
 
                 <div class="col-md-3">
-                    <a href="{% url 'report_create' %}" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
-                        <i class="bi bi-plus-lg me-2"></i>Buat Laporan
-                    </a>
+                    {% if user.is_authenticated and not user.is_admin %}
+                        <a href="{% url 'report_create' %}" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
+                            <i class="bi bi-plus-lg me-2"></i>Buat Laporan
+                        </a>
+                    {% elif user.is_authenticated and user.is_admin %}
+                        <button class="btn btn-secondary w-100 py-2 rounded-3 shadow-sm fw-bold" disabled title="Admin tidak dapat membuat laporan">
+                            <i class="bi bi-plus-lg me-2"></i>Buat Laporan
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm fw-bold">
+                            <i class="bi bi-plus-lg me-2"></i>Buat Laporan
+                        </a>
+                    {% endif %}
                 </div>
             </form>
         </div>
@@ -284,6 +294,7 @@
                         </td>
                         <td class="text-center pe-4">
                             <div class="report-actions">
+                                <!-- Admin Workflow Status Buttons -->
                                 {% if user.is_authenticated and user.is_admin %}
                                     {% if report.status == 'REPORTED' %}
                                         <a href="{% url 'update_status' report.pk 'VERIFIED' %}" class="btn btn-sm btn-primary shadow-sm report-workflow-btn">
@@ -305,16 +316,14 @@
                                         <i class="bi bi-eye-fill"></i>
                                     </button>
 
-                                    {% if user.is_authenticated and user.is_admin %}
-                                    {% if report.status != 'RESOLVED' %}
-                                        <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info report-icon-btn" title="Edit Data">
+                                    <!-- Member Actions - Only for own DRAFT reports -->
+                                    {% if user.is_authenticated and not user.is_admin and report.reporter == user and report.status == 'DRAFT' %}
+                                        <a href="{% url 'report_update' report.pk %}" class="btn btn-sm btn-outline-info report-icon-btn" title="Edit Laporan">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                    {% endif %}
-
-                                    <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger report-icon-btn" title="Hapus Laporan">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                        <a href="{% url 'report_delete' report.pk %}" class="btn btn-sm btn-outline-danger report-icon-btn" title="Hapus Laporan">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
                                     {% endif %}
                                 </div>
                             </div>

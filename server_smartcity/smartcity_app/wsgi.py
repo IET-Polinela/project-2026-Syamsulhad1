@@ -1,5 +1,5 @@
 """
-WSGI config for iet_24782031_2026 project.
+WSGI config for smartcity_app project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'iet_24782031_2026.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smartcity_app.settings')
 
 application = get_wsgi_application()

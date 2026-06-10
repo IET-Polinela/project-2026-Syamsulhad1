@@ -1,10 +1,16 @@
+from django.contrib import messages
 from django.db.models import Count
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView
 
 from main_app.models import CATEGORY_CHOICES, STATUS_CHOICES, Report
+
+
+def user_is_app_admin(user):
+    return user.is_authenticated and getattr(user, 'is_admin', False)
 
 
 def _choice_statistics(field_name, choices):
@@ -48,6 +54,13 @@ def _latest_reports_by_status(status):
 
 class DashboardView(TemplateView):
     template_name = 'dashboard/dashboard.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # Only admin can access dashboard
+        if not user_is_app_admin(request.user):
+            messages.error(request, "Akses ditolak! Hanya admin yang dapat mengakses dashboard.")
+            return redirect('report_list')
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -19,10 +19,22 @@ def redirect_non_admin(request):
     messages.error(request, "Akses ditolak! Hanya admin yang bisa melakukan aksi ini.")
     return redirect('report_list')
 
+def redirect_non_member(request):
+    messages.error(request, "Akses ditolak! Anda tidak memiliki izin untuk mengakses laporan ini.")
+    return redirect('report_list')
+
 class AdminRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
         if not user_is_app_admin(request.user):
             return redirect_non_admin(request)
+        return super().dispatch(request, *args, **kwargs)
+
+class MemberRequiredMixin:
+    """Mixin untuk memastikan user sudah login (authenticated)"""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.error(request, "Anda harus login terlebih dahulu.")
+            return redirect('login')
         return super().dispatch(request, *args, **kwargs)
 
 # 1. HomeView
@@ -111,34 +123,52 @@ class ReportDetailView(DetailView):
     model = Report
     template_name = 'main_app/report_detail.html'
 
-# 4. ReportCreateView
-class ReportCreateView(AdminRequiredMixin, CreateView):
+# 4. ReportCreateView - MEMBER ONLY (Create DRAFT reports)
+class ReportCreateView(MemberRequiredMixin, CreateView):
     model = Report
     form_class = ReportForm
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
 
+    def dispatch(self, request, *args, **kwargs):
+        # Prevent admin from creating reports
+        if user_is_app_admin(request.user):
+            messages.error(request, "Admin tidak dapat membuat laporan baru.")
+            return redirect('report_list')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.reporter = self.request.user
-        form.instance.status = 'REPORTED'
-        messages.success(self.request, "Laporan berhasil dibuat!")
+        form.instance.status = 'DRAFT'  # Save as DRAFT, not REPORTED
+        messages.success(self.request, "Laporan berhasil dibuat dengan status DRAFT!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, "Laporan gagal dibuat. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 5. ReportUpdateView (Sistem Anti-Rollback)
-class ReportUpdateView(AdminRequiredMixin, UpdateView):
+# 5. ReportUpdateView (Sistem Anti-Rollback) - MEMBER ONLY (Edit own DRAFT)
+class ReportUpdateView(MemberRequiredMixin, UpdateView):
     model = Report
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.status == 'RESOLVED':
-            messages.error(request, "Laporan yang sudah selesai tidak dapat diedit. Silakan lihat detail laporan untuk informasi lebih lanjut.")
+        
+        # Admin tidak boleh edit laporan
+        if user_is_app_admin(request.user):
+            messages.error(request, "Admin tidak dapat mengedit isi laporan. Gunakan fitur status untuk mengelola laporan.")
             return redirect('report_detail', pk=self.object.pk)
+        
+        # Member hanya bisa edit laporan milik sendiri yang masih DRAFT
+        if self.object.reporter != request.user:
+            return redirect_non_member(request)
+        
+        if self.object.status != 'DRAFT':
+            messages.error(request, "Hanya laporan dengan status DRAFT yang dapat diedit.")
+            return redirect('report_detail', pk=self.object.pk)
+        
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_class(self):
@@ -162,11 +192,29 @@ class ReportUpdateView(AdminRequiredMixin, UpdateView):
         messages.error(self.request, "Gagal memperbarui laporan. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 6. ReportDeleteView
-class ReportDeleteView(AdminRequiredMixin, DeleteView):
+# 6. ReportDeleteView - MEMBER ONLY (Delete own DRAFT)
+class ReportDeleteView(MemberRequiredMixin, DeleteView):
     model = Report
     template_name = 'main_app/report_delete.html'
     success_url = reverse_lazy('report_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        
+        # Admin tidak boleh delete laporan
+        if user_is_app_admin(request.user):
+            messages.error(request, "Admin tidak dapat menghapus laporan.")
+            return redirect('report_detail', pk=self.object.pk)
+        
+        # Member hanya bisa delete laporan milik sendiri yang masih DRAFT
+        if self.object.reporter != request.user:
+            return redirect_non_member(request)
+        
+        if self.object.status != 'DRAFT':
+            messages.error(request, "Hanya laporan dengan status DRAFT yang dapat dihapus.")
+            return redirect('report_detail', pk=self.object.pk)
+        
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         messages.success(self.request, "Laporan berhasil dihapus.")

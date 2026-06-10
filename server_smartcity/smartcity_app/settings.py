@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-870@ab*a%8rsekdl6p!dm9(49o__+k2^^k!5urdd9s&lq0cc@%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Untuk pengembangan, izinkan semua host. Sesuaikan untuk produksi.
 
 
 # Application definition
@@ -64,7 +64,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'iet_24782031_2026.urls'
+ROOT_URLCONF = 'smartcity_app.urls'
 
 TEMPLATES = [
     {
@@ -84,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'iet_24782031_2026.wsgi.application'
+WSGI_APPLICATION = 'smartcity_app.wsgi.application'
 
 
 # Database
@@ -130,6 +130,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
