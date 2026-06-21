@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
+from drf_spectacular.utils import extend_schema
 from .models import Report
 from .serializers import ReportSerializer
 
@@ -151,6 +151,7 @@ class ReportViewSet(viewsets.ModelViewSet):
 
         instance.delete()
 
+#   @extend_schema(exclude=True)
     @action(detail=True, methods=['post'], url_path='submit')
     def submit(self, request, pk=None):
         report = self.get_object()
