@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
@@ -17,7 +16,7 @@ def user_is_app_admin(user):
 
 def redirect_non_admin(request):
     messages.error(request, "Akses ditolak! Hanya admin yang bisa melakukan aksi ini.")
-    return redirect('report_list')
+    return redirect('home')
 
 def redirect_non_member(request):
     messages.error(request, "Akses ditolak! Anda tidak memiliki izin untuk mengakses laporan ini.")
@@ -93,6 +92,9 @@ def serialize_report(report):
 
 
 def report_list(request):
+    if not user_is_app_admin(request.user):
+        return redirect_non_admin(request)
+
     return render(
         request,
         'main_app/report_list.html',
@@ -118,71 +120,59 @@ class ReportDetailJsonView(View):
         report = get_object_or_404(Report, pk=pk)
         return JsonResponse({'report': serialize_report(report)})
 
+
+def report_detail_api(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+    return JsonResponse({'report': serialize_report(report)})
+
+
+def report_search(request):
+    if not user_is_app_admin(request.user):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
+    query = request.GET.get('q', '')
+    reports = Report.objects.exclude(status='DRAFT')
+
+    if query:
+        reports = reports.filter(
+            Q(title__icontains=query)
+            | Q(location__icontains=query)
+            | Q(description__icontains=query)
+        )
+
+    return JsonResponse({
+        'reports': [serialize_report(report) for report in reports],
+        'total': reports.count(),
+    })
+
 # 3. ReportDetailView
-class ReportDetailView(DetailView):
+class ReportDetailView(AdminRequiredMixin, DetailView):
     model = Report
     template_name = 'main_app/report_detail.html'
 
-# 4. ReportCreateView - MEMBER ONLY (Create DRAFT reports)
-class ReportCreateView(MemberRequiredMixin, CreateView):
+# 4. ReportCreateView - ADMIN ONLY
+class ReportCreateView(AdminRequiredMixin, CreateView):
     model = Report
     form_class = ReportForm
-    template_name = 'main_app/report_form.html'
+    template_name = 'main_app/add_report.html'
     success_url = reverse_lazy('report_list')
-
-    def dispatch(self, request, *args, **kwargs):
-        # Prevent admin from creating reports
-        if user_is_app_admin(request.user):
-            messages.error(request, "Admin tidak dapat membuat laporan baru.")
-            return redirect('report_list')
-        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.reporter = self.request.user
-        form.instance.status = 'DRAFT'  # Save as DRAFT, not REPORTED
-        messages.success(self.request, "Laporan berhasil dibuat dengan status DRAFT!")
+        form.instance.status = self.request.POST.get('status') or 'REPORTED'
+        messages.success(self.request, "Laporan berhasil dibuat.")
         return super().form_valid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, "Laporan gagal dibuat. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 5. ReportUpdateView (Sistem Anti-Rollback) - MEMBER ONLY (Edit own DRAFT)
-class ReportUpdateView(MemberRequiredMixin, UpdateView):
+# 5. ReportUpdateView - ADMIN ONLY
+class ReportUpdateView(AdminRequiredMixin, UpdateView):
     model = Report
+    form_class = ReportForm
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        
-        # Admin tidak boleh edit laporan
-        if user_is_app_admin(request.user):
-            messages.error(request, "Admin tidak dapat mengedit isi laporan. Gunakan fitur status untuk mengelola laporan.")
-            return redirect('report_detail', pk=self.object.pk)
-        
-        # Member hanya bisa edit laporan milik sendiri yang masih DRAFT
-        if self.object.reporter != request.user:
-            return redirect_non_member(request)
-        
-        if self.object.status != 'DRAFT':
-            messages.error(request, "Hanya laporan dengan status DRAFT yang dapat diedit.")
-            return redirect('report_detail', pk=self.object.pk)
-        
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_form_class(self):
-        class UpdateReportForm(forms.ModelForm):
-            class Meta:
-                model = Report
-                fields = ['title', 'category', 'description', 'location']
-                widgets = {
-                    'title': forms.TextInput(attrs={'placeholder': 'Judul Laporan'}),
-                    'category': forms.Select(), 
-                    'description': forms.Textarea(attrs={'placeholder': 'Jelaskan detail masalah...', 'rows': 4}),
-                    'location': forms.TextInput(attrs={'placeholder': 'Lokasi kejadian'}),
-                }
-        return UpdateReportForm
 
     def form_valid(self, form):
         messages.success(self.request, "Laporan berhasil diperbarui!")
@@ -192,33 +182,22 @@ class ReportUpdateView(MemberRequiredMixin, UpdateView):
         messages.error(self.request, "Gagal memperbarui laporan. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 6. ReportDeleteView - MEMBER ONLY (Delete own DRAFT)
-class ReportDeleteView(MemberRequiredMixin, DeleteView):
+# 6. ReportDeleteView - ADMIN ONLY
+class ReportDeleteView(AdminRequiredMixin, DeleteView):
     model = Report
     template_name = 'main_app/report_delete.html'
     success_url = reverse_lazy('report_list')
 
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        
-        # Admin tidak boleh delete laporan
-        if user_is_app_admin(request.user):
-            messages.error(request, "Admin tidak dapat menghapus laporan.")
-            return redirect('report_detail', pk=self.object.pk)
-        
-        # Member hanya bisa delete laporan milik sendiri yang masih DRAFT
-        if self.object.reporter != request.user:
-            return redirect_non_member(request)
-        
-        if self.object.status != 'DRAFT':
-            messages.error(request, "Hanya laporan dengan status DRAFT yang dapat dihapus.")
-            return redirect('report_detail', pk=self.object.pk)
-        
-        return super().dispatch(request, *args, **kwargs)
-
     def form_valid(self, form):
         messages.success(self.request, "Laporan berhasil dihapus.")
         return super().form_valid(form)
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.delete()
+        messages.success(request, "Laporan berhasil dihapus.")
+        return redirect(success_url)
 
 # 7. ReportUpdateStatusView
 class ReportUpdateStatusView(AdminRequiredMixin, View):
@@ -240,11 +219,12 @@ class ReportUpdateStatusView(AdminRequiredMixin, View):
         return redirect('report_list')
 
 # Function view untuk update status via GET
-def update_status(request, pk, new_status):
+def update_status(request, pk, new_status=None):
     if not user_is_app_admin(request.user):
         return redirect_non_admin(request)
 
     report = get_object_or_404(Report, pk=pk)
+    new_status = new_status or request.POST.get('status')
     valid_transitions = {
         'REPORTED': ['VERIFIED'],
         'VERIFIED': ['IN_PROGRESS'],

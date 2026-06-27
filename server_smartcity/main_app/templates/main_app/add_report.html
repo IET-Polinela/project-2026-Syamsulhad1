@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Tambah Laporan{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <h1 class="h3 fw-bold mb-4">Tambah Laporan</h1>
+
+            <form method="post" class="card border-0 shadow-sm">
+                {% csrf_token %}
+                <div class="card-body">
+                    {{ form.as_p }}
+                    <input type="hidden" name="status" value="{{ request.POST.status|default:'REPORTED' }}">
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                    <a href="{% url 'report_list' %}" class="btn btn-outline-secondary">Batal</a>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

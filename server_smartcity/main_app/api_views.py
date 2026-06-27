@@ -126,9 +126,10 @@ class ReportViewSet(viewsets.ModelViewSet):
                 "Citizen hanya dapat mengubah draft miliknya sendiri."
             )
 
+        next_status = self.request.data.get('status')
         serializer.save(
             reporter=report.reporter,
-            status=report.status
+            status='REPORTED' if next_status == 'REPORTED' else report.status
         )
 
     def perform_destroy(self, instance):

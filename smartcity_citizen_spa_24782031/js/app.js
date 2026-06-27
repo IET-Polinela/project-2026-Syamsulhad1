@@ -130,11 +130,53 @@ function resetReportForm() {
     document.getElementById("reportModalLabel").textContent = "Laporan Baru";
 }
 
+function getReportModalElement() {
+    return document.getElementById("reportModal");
+}
+
+function ensureReportModalInstance() {
+    const modalElement = getReportModalElement();
+
+    if (!modalElement) return null;
+
+    if (!reportModalInstance && window.bootstrap && bootstrap.Modal) {
+        reportModalInstance = new bootstrap.Modal(modalElement);
+    }
+
+    return reportModalInstance;
+}
+
+function showReportModal() {
+    const modalElement = getReportModalElement();
+    const modalInstance = ensureReportModalInstance();
+
+    if (modalInstance) {
+        modalInstance.show();
+        return;
+    }
+
+    modalElement.classList.add("show");
+    modalElement.style.display = "block";
+    modalElement.removeAttribute("aria-hidden");
+}
+
+function hideReportModal() {
+    const modalElement = getReportModalElement();
+    const modalInstance = ensureReportModalInstance();
+
+    if (modalInstance) {
+        modalInstance.hide();
+        return;
+    }
+
+    modalElement.classList.remove("show");
+    modalElement.style.display = "none";
+    modalElement.setAttribute("aria-hidden", "true");
+}
+
 function openReportModal(report = null) {
     if (!reportModalInstance) {
-        reportModalInstance = new bootstrap.Modal(
-            document.getElementById("reportModal")
-        );
+        ensureReportModalInstance();
     }
 
     resetReportForm();
@@ -145,7 +187,7 @@ function openReportModal(report = null) {
         document.getElementById("reportModalLabel").textContent = "Edit Draft Laporan";
     }
 
-    reportModalInstance.show();
+    showReportModal();
 }
 
 async function saveReportDraft() {
@@ -185,7 +227,7 @@ async function handleSaveDraft() {
 
     try {
         await saveReportDraft();
-        reportModalInstance.hide();
+        hideReportModal();
         resetReportForm();
         await loadDashboardData(currentDashboardTab, currentDashboardPage);
     } catch (error) {
@@ -206,7 +248,7 @@ async function handleSubmitReport() {
     try {
         const savedReport = await saveReportDraft();
         await submitReport(savedReport.id);
-        reportModalInstance.hide();
+        hideReportModal();
         resetReportForm();
         await loadDashboardData(currentDashboardTab, 1);
     } catch (error) {

@@ -98,8 +98,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'SmartCity_db',
         'USER': 'postgres',
-        'PASSWORD': 'Admin12@',
-        'HOST': 'localhost',
+        'PASSWORD': '24782031',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
