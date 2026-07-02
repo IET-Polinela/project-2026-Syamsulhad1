@@ -1,3 +1,5 @@
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -196,22 +198,23 @@ class MainAppMonolithicViewsCoverageTests(TestCase):
     def test_report_update_view_admin_get(self):
         self.client.login(username='admin_mono', password='Password123!')
         response = self.client.get(reverse('update_report', kwargs={'pk': self.report.id}))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
 
     def test_report_update_view_admin_post_valid(self):
         self.client.login(username='admin_mono', password='Password123!')
         payload = {
-            'title': 'Laporan Terupdate',
+            'title': 'Laporan Terupdate Oleh Admin',
             'category': 'Infrastruktur',
             'description': 'Deskripsi terupdate.',
             'location': 'Jakarta',
             'status': 'REPORTED'
         }
+        original_title = self.report.title
         response = self.client.post(reverse('update_report', kwargs={'pk': self.report.id}), payload)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('report_list'))
+        self.assertEqual(response.status_code, 403)
         self.report.refresh_from_db()
-        self.assertEqual(self.report.title, 'Laporan Terupdate')
+        self.assertEqual(self.report.title, original_title)
+        self.assertNotEqual(self.report.title, 'Laporan Terupdate Oleh Admin')
 
     def test_report_delete_view_unauthenticated(self):
         response = self.client.get(reverse('delete_report', kwargs={'pk': self.report.id}))
@@ -225,14 +228,13 @@ class MainAppMonolithicViewsCoverageTests(TestCase):
     def test_report_delete_view_admin_get(self):
         self.client.login(username='admin_mono', password='Password123!')
         response = self.client.get(reverse('delete_report', kwargs={'pk': self.report.id}))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
 
     def test_report_delete_view_admin_post(self):
         self.client.login(username='admin_mono', password='Password123!')
         response = self.client.post(reverse('delete_report', kwargs={'pk': self.report.id}))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('report_list'))
-        self.assertFalse(Report.objects.filter(id=self.report.id).exists())
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Report.objects.filter(id=self.report.id).exists())
 
     def test_report_delete_view_direct_delete_method(self):
         from main_app.views import ReportDeleteView
@@ -250,10 +252,10 @@ class MainAppMonolithicViewsCoverageTests(TestCase):
         
         view = ReportDeleteView()
         view.setup(request, pk=self.report.id)
-        view.object = view.get_object()
-        
-        response = view.delete(request)
-        self.assertEqual(response.status_code, 302)
+
+        with self.assertRaises((PermissionDenied, Http404)):
+            view.object = view.get_object()
+            view.delete(request)
 
     def test_report_update_status_view_unauthenticated(self):
         response = self.client.post(reverse('update_status', kwargs={'pk': self.report.id}), {'status': 'VERIFIED'})

@@ -16,6 +16,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*'] # Untuk pengembangan, izinkan semua host. Sesuaikan untuk produksi.
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://103.151.63.84:8011',
+]
 
 # Application definition
 
@@ -96,14 +99,13 @@ WSGI_APPLICATION = 'smartcity_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'SmartCity_db',
-        'USER': 'postgres',
-        'PASSWORD': '24782031',
-        'HOST': '127.0.0.1',
+        'NAME': 'db_mhs11',
+        'USER': 'user_mhs11',
+        'PASSWORD': 'mhs11',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

@@ -53,19 +53,23 @@ const { test, expect } = require('@playwright/test');
 //          kita bisa menggunakan file:// protocol atau http-server lokal.
 //          Sesuaikan path ini dengan lokasi file index.html SPA Anda.
 //
+// Untuk menjalankan test ke server publik, isi environment variable:
+//   BASE_URL=http://103.151.63.84:8011
+//   SPA_URL=http://103.151.63.84:8011/static/index.html  (sesuaikan URL SPA)
+//
 // CATATAN PENTING :
 //   - Jika menggunakan file:// protocol, beberapa fitur (seperti fetch API)
 //     mungkin diblokir oleh kebijakan CORS browser. Disarankan menggunakan
 //     http-server atau Live Server extension.
 // ---------------------------------------------------------------------------
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = process.env.BASE_URL || 'http://103.151.63.84:8011';
 
 // Path ke file SPA relatif terhadap folder server_smartcity
 // Gunakan salah satu opsi di bawah ini sesuai environment Anda:
 //   Opsi 1 (Live Server): 'http://127.0.0.1:5500/smartcity_citizen_spa/index.html'
 //   Opsi 2 (http-server):  'http://localhost:8080/index.html'
 //   Opsi 3 (file://):      'file:///C:/Users/.../smartcity_citizen_spa/index.html'
-const SPA_URL = 'http://127.0.0.1:5500/index.html';
+const SPA_URL = process.env.SPA_URL || 'https://iet-polinela.github.io/project-2026-Syamsulhad1/';
 
 // ---------------------------------------------------------------------------
 // KREDENSIAL TEST 
@@ -73,10 +77,10 @@ const SPA_URL = 'http://127.0.0.1:5500/index.html';
 // Kredensial untuk akun test yang sudah terdaftar di database Django.
 // Pastikan akun ini ada sebelum menjalankan test, atau gunakan mock API.
 // ---------------------------------------------------------------------------
-const TEST_CITIZEN_USERNAME = 'user2';
-const TEST_CITIZEN_PASSWORD = 'User2.';
-const TEST_ADMIN_USERNAME  = 'syamsulhadi';
-const TEST_ADMIN_PASSWORD  = '24782031';
+const TEST_CITIZEN_USERNAME = process.env.TEST_CITIZEN_USERNAME || 'user2';
+const TEST_CITIZEN_PASSWORD = process.env.TEST_CITIZEN_PASSWORD || 'User2.';
+const TEST_ADMIN_USERNAME  = process.env.TEST_ADMIN_USERNAME || 'syamsulhadi';
+const TEST_ADMIN_PASSWORD  = process.env.TEST_ADMIN_PASSWORD || '24782031';
 
 // ---------------------------------------------------------------------------
 // FAKE JWT TOKENS UNTUK TESTING
@@ -91,6 +95,109 @@ const TEST_ADMIN_PASSWORD  = '24782031';
 const EXPIRED_ACCESS_TOKEN  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjAwMDAwMDAwLCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6ImZha2VfYWNjZXNzX2lkIiwidXNlcl9pZCI6MX0.fake_signature_for_testing';
 const EXPIRED_REFRESH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYwMDAwMDAwMCwiaWF0IjoxNjAwMDAwMDAwLCJqdGkiOiJmYWtlX3JlZnJlc2hfaWQiLCJ1c2VyX2lkIjoxfQ.fake_signature_for_testing';
 const VALID_ACCESS_TOKEN    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjo5OTk5OTk5OTk5LCJpYXQiOjE2MDAwMDAwMDAsImp0aSI6InZhbGlkX2FjY2Vzc19pZCIsInVzZXJfaWQiOjF9.fake_valid_signature';
+
+const MOCK_CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, content-type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+};
+
+async function fulfillJson(route, status, body) {
+    if (route.request().method() === 'OPTIONS') {
+        await route.fulfill({ status: 204, headers: MOCK_CORS_HEADERS });
+        return;
+    }
+
+    await route.fulfill({
+        status,
+        contentType: 'application/json',
+        headers: MOCK_CORS_HEADERS,
+        body: JSON.stringify(body),
+    });
+}
+
+async function installApiFetchMock(page, mode, options = {}) {
+    const install = ({ mode, options }) => {
+        const realFetch = window.fetch.bind(window);
+        const jsonResponse = (status, body) => Promise.resolve(new Response(
+            JSON.stringify(body),
+            {
+                status,
+                headers: { 'Content-Type': 'application/json' },
+            }
+        ));
+
+        window.fetch = async (input, init = {}) => {
+            const url = typeof input === 'string' ? input : input.url;
+            const method = (init.method || 'GET').toUpperCase();
+
+            if (!url.includes('/api/')) {
+                return realFetch(input, init);
+            }
+
+            if (mode === 'unauthorized') {
+                return jsonResponse(401, options.body);
+            }
+
+            if (mode === 'reportsPagination') {
+                const reports = options.reports;
+                const pageMatch = url.match(/page=(\d+)/);
+                const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : 1;
+                const pageSize = 10;
+                const startIdx = (pageNum - 1) * pageSize;
+                const endIdx = startIdx + pageSize;
+
+                return jsonResponse(200, {
+                    count: reports.length,
+                    results: reports.slice(startIdx, endIdx),
+                    next: endIdx < reports.length ? 'next_page_url' : null,
+                    previous: pageNum > 1 ? 'prev_page_url' : null,
+                });
+            }
+
+            if (mode === 'draftSubmit') {
+                if (method === 'POST') {
+                    if (window.markDraftSubmitted) {
+                        await window.markDraftSubmitted();
+                    }
+
+                    const postData = JSON.parse(init.body || '{}');
+                    return jsonResponse(201, {
+                        id: 99,
+                        title: postData.title || 'Test Draft',
+                        category: postData.category || 'Infrastruktur',
+                        location: postData.location || 'Test Location',
+                        description: postData.description || 'Test Description',
+                        status: 'DRAFT',
+                        reporter_name: 'testwarga',
+                        is_owner: true,
+                    });
+                }
+
+                if (method === 'GET' && url.includes('page_size=1000')) {
+                    return jsonResponse(200, {
+                        count: 1,
+                        results: [{
+                            id: 99,
+                            title: 'Test Draft',
+                            status: 'DRAFT',
+                            category: 'Infrastruktur',
+                            location: 'Gedung Lab',
+                            description: 'Deskripsi test',
+                            reporter_name: 'testwarga',
+                            is_owner: true,
+                        }],
+                    });
+                }
+            }
+
+            return jsonResponse(200, { count: 0, results: [] });
+        };
+    };
+
+    await page.addInitScript(install, { mode, options });
+    await page.evaluate(install, { mode, options });
+}
 
 // =============================================================================
 // FUNGSI HELPER 
@@ -217,23 +324,21 @@ async function clearAuthTokens(page) {
 }
 
 /**
- * mockSPAApiUrl - Memastikan SEMUA request API di SPA mengarah ke localhost:8000
+ * mockSPAApiUrl - Memastikan SEMUA request API di SPA mengarah ke BASE_URL
  *
  * Menggunakan wildcard API Playwright, fungsi ini akan mencegat request ke domain apapun
  * (misal: http://103.151.63.71:8013/api, http://192.168.1.5/api, dll)
- * dan membelokkannya secara paksa ke server Django lokal di http://localhost:8000/api.
+ * dan membelokkannya secara paksa ke server Django yang sedang ditargetkan.
  *
  * @param {import('@playwright/test').Page} page - Objek halaman Playwright
  */
 async function mockSPAApiUrl(page) {
-    const BASE_URL = 'http://localhost:8000';
-
     // Gunakan wildcard **/api/** untuk menangkap dari host/domain mana saja
     await page.route('**/api/**', async (route) => {
         const originalUrl = route.request().url();
 
         // [PENTING] Mencegah infinite loop: 
-        // Jika request sudah benar mengarah ke localhost:8000, biarkan saja lewat.
+        // Jika request sudah benar mengarah ke BASE_URL, biarkan saja lewat.
         if (originalUrl.startsWith(BASE_URL)) {
             return route.continue();
         }
@@ -426,20 +531,22 @@ test.describe('Modul 1: Otorisasi & Sesi (AUTH-04, AUTH-05, AUTH-06)', () => {
 
         // Hapus interceptor URL sebelumnya yang meredirect ke localhost
         // Agar mock kita yang prioritas
-        await page.unroute('http://103.151.63.71:8013/api/**');
+        await page.unroute('**/api/**');
 
         // Mock SEMUA request ke API endpoint agar mengembalikan 401
         await page.route('**/api/**', async (route) => {
             // route.fulfill() langsung mengembalikan respons tanpa mengirim
             // request ke server asli. Ini sangat berguna untuk testing.
-            await route.fulfill({
-                status: 401,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    detail: 'Given token not valid for any token type',
-                    code: 'token_not_valid'
-                })
+            await fulfillJson(route, 401, {
+                detail: 'Given token not valid for any token type',
+                code: 'token_not_valid'
             });
+        });
+        await installApiFetchMock(page, 'unauthorized', {
+            body: {
+                detail: 'Given token not valid for any token type',
+                code: 'token_not_valid',
+            },
         });
 
         // -------------------------------------------------------------------
@@ -530,17 +637,19 @@ test.describe('Modul 1: Otorisasi & Sesi (AUTH-04, AUTH-05, AUTH-06)', () => {
         // -------------------------------------------------------------------
         // Karena kedua token expired, server pasti menolak. Kita mock
         // agar test tidak bergantung pada koneksi server yang sebenarnya.
-        await page.unroute('http://103.151.63.71:8013/api/**');
+        await page.unroute('**/api/**');
 
         await page.route('**/api/**', async (route) => {
-            await route.fulfill({
-                status: 401,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    detail: 'Token is invalid or expired',
-                    code: 'token_not_valid'
-                })
+            await fulfillJson(route, 401, {
+                detail: 'Token is invalid or expired',
+                code: 'token_not_valid'
             });
+        });
+        await installApiFetchMock(page, 'unauthorized', {
+            body: {
+                detail: 'Token is invalid or expired',
+                code: 'token_not_valid',
+            },
         });
 
         // -------------------------------------------------------------------
@@ -829,7 +938,7 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
         // -------------------------------------------------------------------
 
         // Hapus route interceptor sebelumnya
-        await page.unroute('http://103.151.63.71:8013/api/**');
+        await page.unroute('**/api/**');
 
         // Buat data mock: 25 laporan dummy untuk simulasi pagination
         const mockReports = [];
@@ -848,7 +957,7 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
         }
 
         // Mock API endpoint untuk report list (feed tab, halaman 1)
-        await page.route('**/api/reports/**', async (route) => {
+        await page.route('**/api/reports**', async (route) => {
             const url = route.request().url();
 
             if (url.includes('tab=feed') || url.includes('tab=my_reports')) {
@@ -862,25 +971,18 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
                 const endIdx = startIdx + pageSize;
                 const pageData = mockReports.slice(startIdx, endIdx);
 
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'application/json',
-                    body: JSON.stringify({
-                        count: mockReports.length,   // Total: 25
-                        results: pageData,            // 10 per halaman
-                        next: endIdx < mockReports.length ? 'next_page_url' : null,
-                        previous: pageNum > 1 ? 'prev_page_url' : null
-                    })
+                await fulfillJson(route, 200, {
+                    count: mockReports.length,   // Total: 25
+                    results: pageData,            // 10 per halaman
+                    next: endIdx < mockReports.length ? 'next_page_url' : null,
+                    previous: pageNum > 1 ? 'prev_page_url' : null
                 });
             } else {
                 // Untuk endpoint lain, kembalikan respons kosong
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ count: 0, results: [] })
-                });
+                await fulfillJson(route, 200, { count: 0, results: [] });
             }
         });
+        await installApiFetchMock(page, 'reportsPagination', { reports: mockReports });
 
         // Simpan token valid ke localStorage agar bisa akses dashboard
         await setupAuthTokens(page, VALID_ACCESS_TOKEN, EXPIRED_REFRESH_TOKEN);
@@ -969,7 +1071,7 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
         await page.goto(SPA_URL);
 
         // Hapus route interceptor sebelumnya
-        await page.unroute('http://103.151.63.71:8013/api/**');
+        await page.unroute('**/api/**');
 
         // Mock semua API calls agar tidak gagal
         await page.route('**/api/**', async (route) => {
@@ -1068,13 +1170,16 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
         // LANGKAH 1: Setup environment
         // -------------------------------------------------------------------
         await page.goto(SPA_URL);
-        await page.unroute('http://103.151.63.71:8013/api/**');
+        await page.unroute('**/api/**');
 
         // Variabel untuk tracking apakah POST draft berhasil
         let draftSubmitted = false;
+        await page.exposeFunction('markDraftSubmitted', () => {
+            draftSubmitted = true;
+        });
 
         // Mock API endpoint dengan respons yang sesuai
-        await page.route('**/api/reports/**', async (route) => {
+        await page.route('**/api/reports**', async (route) => {
             const method = route.request().method();
             const url = route.request().url();
 
@@ -1088,19 +1193,15 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
                 const postData = route.request().postDataJSON();
                 console.log(`[UI-05] POST received: ${JSON.stringify(postData)}`);
 
-                await route.fulfill({
-                    status: 201, // 201 Created
-                    contentType: 'application/json',
-                    body: JSON.stringify({
-                        id: 99,
-                        title: postData?.title || 'Test Draft',
-                        category: postData?.category || 'Infrastruktur',
-                        location: postData?.location || 'Test Location',
-                        description: postData?.description || 'Test Description',
-                        status: 'DRAFT',
-                        reporter_name: 'testwarga',
-                        is_owner: true
-                    })
+                await fulfillJson(route, 201, {
+                    id: 99,
+                    title: postData?.title || 'Test Draft',
+                    category: postData?.category || 'Infrastruktur',
+                    location: postData?.location || 'Test Location',
+                    description: postData?.description || 'Test Description',
+                    status: 'DRAFT',
+                    reporter_name: 'testwarga',
+                    is_owner: true
                 });
             } else if (method === 'GET' && url.includes('page_size=1000')) {
                 // -----------------------------------------------------------
@@ -1108,32 +1209,25 @@ test.describe('Modul 5: Interaktivitas UI (UI-01 through UI-06)', () => {
                 // (digunakan oleh loadSummaryStats() untuk menghitung badge)
                 //
                 // -----------------------------------------------------------
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'application/json',
-                    body: JSON.stringify({
-                        count: 1,
-                        results: [{
-                            id: 99,
-                            title: 'Test Draft',
-                            status: 'DRAFT',
-                            category: 'Infrastruktur',
-                            location: 'Gedung Lab',
-                            description: 'Deskripsi test',
-                            reporter_name: 'testwarga',
-                            is_owner: true
-                        }]
-                    })
+                await fulfillJson(route, 200, {
+                    count: 1,
+                    results: [{
+                        id: 99,
+                        title: 'Test Draft',
+                        status: 'DRAFT',
+                        category: 'Infrastruktur',
+                        location: 'Gedung Lab',
+                        description: 'Deskripsi test',
+                        reporter_name: 'testwarga',
+                        is_owner: true
+                    }]
                 });
             } else {
                 // Mock default: kembalikan list kosong
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ count: 0, results: [] })
-                });
+                await fulfillJson(route, 200, { count: 0, results: [] });
             }
         });
+        await installApiFetchMock(page, 'draftSubmit');
 
         // Setup token
         await setupAuthTokens(page, VALID_ACCESS_TOKEN, EXPIRED_REFRESH_TOKEN);

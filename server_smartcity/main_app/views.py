@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -167,12 +167,20 @@ class ReportCreateView(AdminRequiredMixin, CreateView):
         messages.error(self.request, "Laporan gagal dibuat. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 5. ReportUpdateView - ADMIN ONLY
+# 5. ReportUpdateView - ADMIN BLOCKED FROM CONTENT EDITS
 class ReportUpdateView(AdminRequiredMixin, UpdateView):
     model = Report
     form_class = ReportForm
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not user_is_app_admin(request.user):
+            return redirect_non_admin(request)
+        return HttpResponseForbidden("Admin tidak dapat mengubah isi laporan warga.")
+
+    def get_queryset(self):
+        return Report.objects.none()
 
     def form_valid(self, form):
         messages.success(self.request, "Laporan berhasil diperbarui!")
@@ -182,11 +190,19 @@ class ReportUpdateView(AdminRequiredMixin, UpdateView):
         messages.error(self.request, "Gagal memperbarui laporan. Periksa kembali data yang diisi.")
         return super().form_invalid(form)
 
-# 6. ReportDeleteView - ADMIN ONLY
+# 6. ReportDeleteView - ADMIN BLOCKED FROM DELETING REPORTS
 class ReportDeleteView(AdminRequiredMixin, DeleteView):
     model = Report
     template_name = 'main_app/report_delete.html'
     success_url = reverse_lazy('report_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not user_is_app_admin(request.user):
+            return redirect_non_admin(request)
+        return HttpResponseForbidden("Admin tidak dapat menghapus laporan warga.")
+
+    def get_queryset(self):
+        return Report.objects.none()
 
     def form_valid(self, form):
         messages.success(self.request, "Laporan berhasil dihapus.")
